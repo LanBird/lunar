@@ -27,20 +27,24 @@
 //   - disconnect client
 
 // transmission format of build targets
+/*
 target {
   file
   name
   inputs[]
   outputs[]
 }
+*/
 
 // transmission format of files
-file {
+/*
+ file {
   directory
   name
   hash
   date
 }
+*/
 
 
   

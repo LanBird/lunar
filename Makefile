@@ -1,45 +1,54 @@
 
-CFLAGS = $(shell echo $$CFLAGS)
+CFLAGS = $(shell echo $$CFLAGS) -Iinclude
 LDFLAGS = -llua -pthread
 
-OBJECTS_DIR = $(shell echo $$OBJROOT)
-BINARIES_DIR = $(shell echo $$SYMROOT)
+OBJ_DIR = $(shell echo $$OBJROOT)
+BIN_DIR = $(shell echo $$SYMROOT)
+DEP_DIR = $(shell echo $$OBJROOT)
 
-ifeq ($(OBJECTS_DIR),)
-  OBJECTS_DIR = build
+ifeq ($(OBJ_DIR),)
+  OBJ_DIR = build
 endif
-ifeq ($(BINARIES_DIR),)
-  BINARIES_DIR = $(OBJECTS_DIR)
+ifeq ($(BIN_DIR),)
+  BIN_DIR = $(OBJ_DIR)
+endif
+ifeq ($(DEP_DIR),)
+  DEP_DIR = $(OBJ_DIR)/dep
 endif
 
-SOURCE_DIR = ./source
-INCLUDE_DIR = ./include
+SRC_DIR = source
+INC_DIR = include
 
-OBJECTS = sha1.o lunar.o lunard.o file.o database.o intmath.o
-BINARIES = lunar lunard
+OBJ = $(shell ls $(SRC_DIR)/*.c | sed "s'$(SRC_DIR)\(.*\)\.c$$'$(OBJ_DIR)\1.o'")
+BIN = $(shell grep "int[ \t\n]\+main[ \t\n]*(.*)[ \t\n]*{" $(SRC_DIR)/*.c \
+              | sed "s'^$(SRC_DIR)\(.*\)\.c:.*'$(BIN_DIR)\1'" )
 
-all:	$(addprefix $(BINARIES_DIR)/,$(BINARIES))
+$(OBJ):	$(OBJ_DIR)/%.o:	$(DEP_DIR)/%.cc.d
+	@$(MAKE) -f $(patsubst $(OBJ_DIR)/%.o,$(DEP_DIR)/%.cc.d,$@) $@
 
-clean:
-	cd $(OBJECTS_DIR) && rm -f $(OBJECTS)
-	cd $(BINARIES_DIR) && rm -f $(BINARIES)
+$(BIN):	$(BIN_DIR)/%:	$(DEP_DIR)/%.ld.d
+	echo $(BIN)
+	@$(MAKE) -f $(patsubst $(BIN_DIR)/%,$(DEP_DIR)/%.ld.d,$@) $@
 
-install:
-	echo install
+$(DEP_DIR)/%.cc.d:
+	gcc -M -I$(INC_DIR) $(patsubst $(DEP_DIR)/%.cc.d,$(SRC_DIR)/%.c,$@) \
+	| sed "s'^\(.*\.o\):'$(OBJ_DIR)/\1:'" > $@
+	echo "	$(CC) -c $(CFLAGS) \$$< -o \$$@" >> $@
 
-test:
-	echo test
+$(DEP_DIR)/%.ld.d:
+	gcc -M -I$(INC_DIR) $(patsubst $(DEP_DIR)/%.ld.d,$(SRC_DIR)/%.c,$@) -o $@.tmp
+	echo "-include Makefile" > $@
+	files="" ; \
+	for file in $$(cat $@.tmp); do \
+		if [ -f "$(SRC_DIR)/$$(basename $${file%.h}.c)" ]; then \
+	    files="$${files}$(OBJ_DIR)/$$(basename $${file%.h}.o) " ; \
+		fi ; \
+	done ; \
+	echo "$(patsubst $(DEP_DIR)/%.ld.d,$(BIN_DIR)/%,$@):	$${files}" >> $@
+	echo "	$(CC) $(LDFLAGS) \$$(filter %.o,\$$^) -o \$$@" >> $@
+	rm $@.tmp
 
-documentation:
-	echo documentation
+.PHONY:	all $(BIN) $(OBJ)
+.DEFAULT:	all
 
-.PHONY:	all clean install test documentation $(BINARIES)
-
-$(BINARIES_DIR)/lunar:	$(OBJECTS_DIR)/lunar.o $(OBJECTS_DIR)/sha1.o $(OBJECTS_DIR)/database.o $(OBJECTS_DIR)/intmath.o
-	$(CC) $(LDFLAGS) $^ -o $@
-	
-$(BINARIES_DIR)/lunard:	$(OBJECTS_DIR)/lunard.o
-	$(CC) $(LDFLAGS) $^ -o $@
-	
-$(addprefix $(OBJECTS_DIR)/,$(OBJECTS)):	$(OBJECTS_DIR)/%.o:	$(SOURCE_DIR)/%.c
-	$(CC) $(CFLAGS) -c -Iinclude $< -o $@
+all:	$(BIN)
