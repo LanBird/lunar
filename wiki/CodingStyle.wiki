@@ -1,0 +1,123 @@
+#summary A short, maybe incomplete definition of the coding style used.
+
+= Files =
+
+Each .c file in source/ should have a .h file in which it declares the functions
+and structures for "public use".
+If a module does not specify any of these it probably represents an endpoint and
+consists only of a main function. If this is the case there is no need for a .h
+file.
+
+All .c files are translated to objects with the same name (excluding the
+extension).
+If a .c file defines a main function an executable is linked and named after the
+actual source file.
+
+= Syntax-elements =
+
+== Braces and Newlines ==
+
+The placement of curcly braces is mostly a matter of taste, but to ensure a
+consistent look of the sourcecode we decided to place the opening `{` at the
+end of the line of the expression.
+
+This goes for functions, if/switch/while/for/do blocks as well as structures or
+mere blocks (though there is no expression before the opening brace of a block).
+
+There should be exactly one whitespace between the expression and the `{`.
+
+In any case the opening brace should be followed by a new line (or a C++-style
+comment).
+
+= Comments =
+
+Undocumented commits will be reverted.
+
+== C++-style comments ==
+
+Most source-code related documentation should be made using C++-style (starting
+with `//`) comments. Place the comment at the end of the line you want to
+document or - if this does not fit - in the line just before. There should be
+one whitespace before and after te two slashes.
+
+If successive lines have C++-style comments you should try to align them to
+start on the same column.
+
+Example:
+{{{
+void * data = in_buffer; // user input
+int i = 0;               // used to iterate through the data
+}}}
+
+== C-style comments ==
+
+C-style (`/* ... */`) comments are used to comment actual source-code that
+you don't seem to need but you're afraid to completely remove it.
+If you comment whole lines create new lines for the opening and the closing
+mark. You may specify a reason why you disabled the code from being processed.
+
+If you really think you need them for documentation you should probably think
+about writing code that is more intuitive. Comments consisting of multiple
+sentences should be javadoc-style as described below.
+
+Example:
+{{{
+/* Replaced by a more intuitive but experimental function
+int i = 13516 * x << funny( a );
+*/
+int i = recalculate( x, a );
+}}}
+
+== Javadoc-style comments ==
+
+Javadoc-style (starting with `/**`) comments are used to document each function
+and struct. A short description of what the function does or which purpose the
+struct serves should be made.
+
+All functions in .c files should be documented with javadoc-style comments.
+
+Each .h file should contain a brief description of the module. There is no need
+to document the function definitions. If structs are defined in the .h file
+these should be documented with javadoc-style comments.
+
+Example:
+
+include/myfile.h
+{{{
+#ifndef _LUNAR_MYFILE_H
+#define _LUNAR_MYFILE_H
+
+/**
+ * The mydata struct defines a key-value-pair. Additional information on why
+ * this is here should be made.
+ */
+struct mydata {
+  int key;     // the key associated with the data
+  void * data; // arbitary data
+};
+
+struct mydata * myfile_new_mydata( uint64_t size );
+
+#endif
+}}}
+
+source/myfile.c
+{{{
+#include "myfile.h"
+
+/**
+ * Allocate space for a new mydata structure and initialize it with values.
+ */
+struct mydata * myfile_new_mydata( uint64_t size ) {
+  // to what you promised to do
+}
+
+/**
+ * This is a helper function to do serious calculations. Notice that you have to
+ * document functions not present in the .h file as well.
+ */
+uint64_t myfile_help( uint64_t operatand ) {
+  return 2 * operand;
+}
+
+}}}
