@@ -17,3 +17,5 @@ Especially the last point is interesting. The ability to communicate as a (simpl
 Using the HTTP protocol saves us the pain to create yet another proprietary protocol that nobody needs and gives a well-defined interface for third party applications.
 
 Which parts of HTTP/1.1 will be implemented and which parts (on top) are lunar specific can be read [Protocol here].
+
+One more point is that users may want to generate distribution packages. These are most often in the .tar.gz format. We would not want to integrate a full implemetation of tar but it could be interesting to be able to examine package contents and the modification times of files ..
