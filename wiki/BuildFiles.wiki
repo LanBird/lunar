@@ -91,3 +91,35 @@ lunar.rules:clear()
 lunar.rules:add( myrule )
 
 }}}
+
+
+== Events and listeners ==
+
+Lunar uses a simple publisher-subscriber-model for all output. Listeners wait for events to happen and then print a fitting message. You can use this for implementing your own output.
+
+You can induce events anytime using `myevent:induce()`. After that all listeners for the event will be executed using `somelistener:action( myevent )`.
+
+Let's illustrate this with an example:
+
+{{{
+
+myevent = lunar.events:new( "outofmem" )
+mylistener = lunar.listeners:new( "outofmem" )
+mylistener.events:add( myevent )
+mylistener.action = function( event )
+  print( event.timestamp )
+  print( "Out of memory" )
+  -- do some logging?
+end
+
+mytarget = lunar.targets:new( "test" )
+mytarget.input_files:add( "pretty_big_file" )
+mytarget.output_files:add( "even_bigger_file" )
+mytarget.action = function()
+  -- iffiletobig
+  lunar.events:find( "outofmem" ).induce()
+end
+
+}}}
+
+This is about it.
