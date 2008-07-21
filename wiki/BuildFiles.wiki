@@ -77,13 +77,15 @@ You can of course specify your own rules and disable the built-in rules if this 
 
 myrule = lunar.rules:new( "Compile using GCC" )
 
-myrule.filter = function( target )
+myrule.filter = function( filter, target )
+  -- since we call using `:` filter is like a
+  -- this in other languages
   -- do something using target
   -- return true if you think you can build
   -- the target with myrule, false otherwise
 end
 
-myrule.action = function( target )
+myrule.action = function( filter, target )
   -- do something using target
   -- return true if the action (build) succeeded
   -- false otherwise
@@ -108,7 +110,7 @@ Let's illustrate this with an example:
 myevent = lunar.events:new( "outofmem" )
 mylistener = lunar.listeners:new( "outofmem" )
 mylistener.events:add( myevent )
-mylistener.action = function( event )
+mylistener.action = function( listener, event )
   print( event.timestamp )
   print( "Out of memory" )
   -- do some logging?
@@ -117,9 +119,9 @@ end
 mytarget = lunar.targets:new( "test" )
 mytarget.input_files:add( "pretty_big_file" )
 mytarget.output_files:add( "even_bigger_file" )
-mytarget.action = function()
+mytarget.action = function( target )
   -- iffiletobig
-  lunar.events:find( "outofmem" ).induce()
+  lunar.events:find( "outofmem" ):induce()
 end
 
 }}}
