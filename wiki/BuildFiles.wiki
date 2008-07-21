@@ -5,7 +5,7 @@
   # [#Introduction Introduction]
   # [#Details Details]
     # [#A_simple_example A simple example]
-    # [#Complex_Targets Complex_Targets]
+    # [#Complex_targets Complex targets]
     # [#Rules Rules]
     # [#Events_and_listeners Events and listeners]
 
