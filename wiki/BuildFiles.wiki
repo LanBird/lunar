@@ -75,6 +75,7 @@ You can of course specify your own rules and disable the built-in rules if this 
 
 {{{
 
+lunar.rules:clear()
 myrule = lunar.rules:new( "Compile using GCC" )
 
 myrule.filter = function( filter, target )
@@ -91,10 +92,9 @@ myrule.action = function( filter, target )
   -- false otherwise
 end
 
-lunar.rules:clear()
-lunar.rules:add( myrule )
-
 }}}
+
+This example first clears the rules list, before the new entry is created.
 
 
 == Events and listeners ==
