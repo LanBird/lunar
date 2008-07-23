@@ -1,6 +1,6 @@
 #include "test.h"
-#include "sha1.h"
 #include "types.h"
+#include "sha1.h"
 
 int sha1_test();
 

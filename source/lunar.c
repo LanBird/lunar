@@ -70,60 +70,6 @@ int main(void) {
 
   /* Remember to destroy the Lua State */
   lua_close(l);
-    
-  uint32_t e[5] = { 0x84983e44, 0x1c3bd26e, 0xbaae4aa1, 0xf95129e5, 0xe54670f1 };
-  uint32_t h[5];
-  
-  printf( "SHA-1 test\n" );
-  sha1( (byte_t *) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 448/8, h );
-  printf( "expected: %x%x%x%x%x\n", e[0], e[1], e[2], e[3], e[4] );
-  printf( "result:   %x%x%x%x%x\n", h[0], h[1], h[2], h[3], h[4] );
-  if( e[0] == h[0] && e[1] == h[1] && e[2] == h[2] && e[3] == h[3] && e[4] == h[4] ) {
-    printf( "[success]\n" );
-  } else {
-    printf( "[failed]\n" ); 
-  }
-  
-  uint32_t i = h[1];
-  uint32_t x = 0;
-  uint32_t y = 0;
-  
-  printf( "BINARY test\n" );
-  int j;
-  for( j=7; j<25; j++ ) {
-    uint32_t m = 0xffffffff >> j;
-    x += ( i >> j & m ) | i << (32-j);
-    y += i >> j | i << (32-j);
-  }
-  printf( "expected: %x\n", y );
-  printf( "result:   %x\n", x );
-  if( x == y ) {
-    printf( "[success]\n" );
-  } else {
-    printf( "[failed]\n" );
-  }
-  
-  printf( "STRUCT test\n" );
-  printf( "sizeof( test_struct_1 ): %i\n", sizeof( struct test_struct_1 ) );
-  printf( "sizeof( test_struct_2 ): %i\n", sizeof( struct test_struct_2 ) );
 
-  printf( "LOG2 test\n" );
-  i=1;
-  for( j=0; j<8; j++ ) {
-    i=i<<1;
-    printf( "log2( %i ): %i\n", i-1, intmath_log2( i-1 ) );
-    printf( "log2( %i ): %i\n", i, intmath_log2( i ) );
-  }
-  if( intmath_log2( 0x8000000000000000ll ) == 63 ) {
-    printf( "large number test: OK\n" );
-    printf( "log2( %llu ): %llu\n", 0x8000000000000000ll, intmath_log2( 0x8000000000000000ll ) );
-  } else {
-    printf( "large number test: FAILED\n" );
-    printf( "log2( %llu ): %llu\n", 0x8000000000000000ll, intmath_log2( 0x8000000000000000ll ) );
-  }
-  
-  printf( "DATABASE test\n" );
-  struct table_info * t = database_new_table( 2, 10 );
-  
   return 0;
 }

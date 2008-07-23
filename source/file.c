@@ -10,8 +10,8 @@ byte_t FILE_FLAG_UNHASHED     = 0x10;
 byte_t FILE_FLAG_USER_1       = 0x40;
 byte_t FILE_FLAG_USER_2       = 0x80;
 
-struct file * file_create( char * filename ) {
-  struct file * f = (struct file * ) malloc( sizeof( struct file ) );
+struct file_info * file_create( char * filename ) {
+  struct file_info * f = (struct file_info * ) malloc( sizeof( struct file_info ) );
   f->flags = FILE_FLAG_NON_EXISTENT | FILE_FLAG_UNHASHED;
   // create hash -> reference from filename
   // try to open file, unset FILE_FLAG_NON_EXISTENT

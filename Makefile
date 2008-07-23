@@ -78,6 +78,8 @@ $(DEP_DIR)/%.ld.d:
 	echo "	$(CC) $(LDFLAGS) \$$(filter %.o,\$$^) -o \$$@" >> $@
 	rm $@.tmp
 
+#.INTERMEDIATE: $(TST_DIR)/tests.h
+
 $(TST_DIR)/tests.h:
 	files=1 ; \
 	for file in $(TST); do \
@@ -91,9 +93,8 @@ $(TST_DIR)/tests.h:
 	echo "  0" >> $@
 	echo "};" >> $@
 
-$(BIN_DIR)/$(TST_DIR)/test:	$(OBJ_DIR)/$(TST_DIR)/test.o $(TST) $(patsubst $(OBJ_DIR)/$(TST_DIR)/%.o,$(OBJ_DIR)/%.o,$(TST))
+$(BIN_DIR)/$(TST_DIR)/test:	$(OBJ_DIR)/$(TST_DIR)/test.o $(TST_DIR)/tests.h $(TST) $(filter-out $(patsubst $(BIN_DIR)/%,$(OBJ_DIR)/%.o,$(BIN)),$(OBJ))
 	$(CC) $(LDFLAGS) $(filter %.o,$^) -o $@
 
 $(OBJ_DIR)/$(TST_DIR)/test.o:	$(TST_DIR)/tests.h $(TST_DIR)/test.c
 	$(CC) -Itest -Iinclude $(TST_DIR)/test.c -c -o $@
-	rm $(TST_DIR)/tests.h

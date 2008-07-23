@@ -26,20 +26,18 @@ int run_test( struct test_info * test ) {
       printf( "Error during setup. (#%i)\n", e0 );
     }      
   }
-  if( test->run != 0 ) {
+  if( test->run != 0 && e0 == 0 ) {
     e1 = (*(test->run))();
     if( e1 > 0 ) {
       printf( "Error during test. (#%i)\n", e1 );
     } else {
       printf( "Test succeeded.\n" );
     }
-  } else {
-    printf( "No function to run test available.\n" );
   }
-  if( test->tear_down != 0 ) {
+  if( test->tear_down != 0 && e0 == 0 ) {
     e2 = (*(test->tear_down))();
     if( e2 > 0 ) {
-      printf( "Error during tear down. (#%i)", e2 );
+      printf( "Error during tear down. (#%i)\n", e2 );
     }
   }
   return e0 + e1 + e2;
