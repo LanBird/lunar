@@ -21,10 +21,7 @@ extern byte_t FILE_FLAG_UNHASHED;
 extern byte_t FILE_FLAG_USER_1;
 extern byte_t FILE_FLAG_USER_2;
 
-typedef uint64_t fileref_t;
-
-struct file {
-  fileref_t reference;
+struct file_info {
   char *    name;
   byte_t    hash[5];
   byte_t    flags;
@@ -33,6 +30,6 @@ struct file {
 };
 
 // Create a new file record and initialize it.
-struct file * file_create( char * filename );
+struct file_info * file_create( char * filename );
 
 #endif

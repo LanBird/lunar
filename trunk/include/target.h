@@ -2,6 +2,7 @@
 #define _LUNAR_TARGET_H
 
 #include "types.h"
+#include "file.h"
 
 // TARGET FLAGS:
 //   1 = up to date      (target doesn't need an update)
@@ -17,21 +18,18 @@ extern byte_t TARGET_FLAG_FORCE_REBUILD;
 extern byte_t TARGET_FLAG_SKIP;
 extern byte_t TARGET_FLAG_FAILED;
 extern byte_t TARGET_FLAG_UNHASHED;
-// extern byte_t TARGET_FLAG_UNUSED;
+extern byte_t TARGET_FLAG_UNUSED;
 extern byte_t TARGET_FLAG_USER_1;
 extern byte_t TARGET_FLAG_USER_2;
 
-typedef uint64_t targetref_t;
-
-struct target {
-  targetref_t   reference;
-  char        * name;
-  byte_t        hash[5];
-  byte_t        flags;
-  fileref_t     file;
-  targetref_t * dependencies;
-  fileref_t   * input_files;
-  fileref_t   * output_files;
+struct target_info {
+  char   * name;
+  byte_t   hash[5];
+  byte_t   flags;
+  struct file_info   * file;
+  struct target_info * dependencies;
+  struct file_info   * input_files;
+  struct file_info   * output_files;
 };
 
 #endif
