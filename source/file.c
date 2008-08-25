@@ -19,3 +19,4 @@ struct file_info * file_create( char * filename ) {
   // set size
   return f;
 }
+

@@ -19,3 +19,4 @@ int test_require( struct test_info * test );
 int test_run( struct test_info * test );
 
 #endif
+

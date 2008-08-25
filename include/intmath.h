@@ -6,3 +6,4 @@
 int64_t intmath_log2( uint64_t n );
 
 #endif
+
