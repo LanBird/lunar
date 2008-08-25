@@ -33,3 +33,4 @@ struct file_info {
 struct file_info * file_create( char * filename );
 
 #endif
+

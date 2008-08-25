@@ -56,3 +56,4 @@ int database_index_update( struct index_info * index, uint64_t key, void * buffe
 int database_index_delete( struct index_info * index, uint64_t key );
 
 #endif
+

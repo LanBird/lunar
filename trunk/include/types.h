@@ -16,3 +16,4 @@ typedef unsigned char      byte_t;
 typedef unsigned long long date_t;
 
 #endif
+

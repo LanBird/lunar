@@ -6,3 +6,4 @@
 int sha1( const byte_t * buffer, const uint64_t length, uint32_t h[] );
 
 #endif
+

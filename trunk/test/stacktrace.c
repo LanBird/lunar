@@ -15,3 +15,4 @@ struct test_info test_stacktrace = {
 int stacktrace_test() {
   return 1;
 }
+
