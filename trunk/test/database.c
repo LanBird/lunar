@@ -17,7 +17,7 @@ struct test_info test_database = {
 };
 
 struct table_info * database_test_table;
-struct table_info * database_test_index;
+struct index_info * database_test_index;
 
 uint64_t database_test_hash( void * buffer, uint64_t size, int pass ) {
   uint64_t r=0;
@@ -51,4 +51,6 @@ int database_test() {
 }
 
 int database_tear_down() {
+  return 0;
 }
+

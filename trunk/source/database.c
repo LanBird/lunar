@@ -113,6 +113,7 @@ int database_build_index( struct index_info * index ) {
     } else {
       // reference the primary index
     }
+    return 0;
   }
 }
 
@@ -125,6 +126,7 @@ int database_build_index( struct index_info * index ) {
  */
 int database_copy_index_data( uint64_t * source_data, uint64_t source_size,
                               uint64_t * target_data, uint64_t target_size ) {
+  return 0;
 }
 
 /**
@@ -135,6 +137,7 @@ int database_copy_index_data( uint64_t * source_data, uint64_t source_size,
  */
 int database_reference_index( struct index_info * index,
                               struct index_info * reference ) {
+  return 0;
 }
 
 /**
@@ -143,6 +146,7 @@ int database_reference_index( struct index_info * index,
  * @param index the index to be dereferenced.
  */
 int database_dereference_index( struct index_info * index ) {
+  return 0;
 }
 
 /**
@@ -157,7 +161,7 @@ int database_rebuild_table( struct table_info * table ) {
   if( table == NULL ) {
     return LUNAR_ENULL;
   } else {
-    pthread_rwlock_wrlock( &(table->rwlock) );
+  //pthread_rwlock_wrlock( &(table->rwlock) );
     
     struct index_info * primary = table->index;
     uint64_t   new_size = database_optimal_size( table->items );
@@ -170,7 +174,7 @@ int database_rebuild_table( struct table_info * table ) {
     uint64_t i=0; // step through the new item
     uint64_t j=0; // count the new items
     
-    pthread_rwlock_wrlock( &(primary->rwlock) );
+  //pthread_rwlock_wrlock( &(primary->rwlock) );
     
     // iterate through the primary index and copy each record to the new table
     while( index_it < (primary->data + primary->size) ) {
@@ -190,8 +194,9 @@ int database_rebuild_table( struct table_info * table ) {
     table->size = new_size;
     table->data = new_data;
     
-    pthread_rwlock_unlock( &(primary->rwlock) );
-    pthread_rwlock_unlock( &(table->rwlock) );
+  //pthread_rwlock_unlock( &(primary->rwlock) );
+  //pthread_rwlock_unlock( &(table->rwlock) );
+    return 0;
   }
 }
 
@@ -208,19 +213,19 @@ int database_rebuild_index( struct index_info * index ) {
   } else if( index->table == NULL ) {
     return LUNAR_ENULL;
   } else {
-    pthread_rwlock_wrlock( &(index->rwlock) );
+  //pthread_rwlock_wrlock( &(index->rwlock) );
     
-    pthread_rwlock_t  * rdlock; // pointer to the lock of the referenced data
-    struct index_info * primary = index->table->index;
+  //pthread_rwlock_t  * rdlock; // pointer to the lock of the referenced data
+  //struct index_info * primary = index->table->index;
     
     // decide which data should not be written to during the rebuild
-    if( index == primary ) {
-      rdlock = &(index->table->rwlock); // primary indices point to table data
-    } else {
-      rdlock = &(primary->rwlock);      // user indices reference a primary
-    }
+  //if( index == primary ) {
+  //  rdlock = &(index->table->rwlock); // primary indices point to table data
+  //} else {
+  //  rdlock = &(primary->rwlock);      // user indices reference a primary
+  //}
     
-    pthread_rwlock_rdlock( rdlock );
+  //pthread_rwlock_rdlock( rdlock );
   
     // If the index does not contain all items rebuild it
     if( index->table->items > index->items ) {
@@ -237,8 +242,9 @@ int database_rebuild_index( struct index_info * index ) {
       index->data = new_data;
     }
     
-    pthread_rwlock_unlock( rdlock );
-    pthread_rwlock_unlock( &(index->rwlock) );
+  //pthread_rwlock_unlock( rdlock );
+  //pthread_rwlock_unlock( &(index->rwlock) );
+    return 0;
   }
 }
 
@@ -251,6 +257,7 @@ int database_rebuild_index( struct index_info * index ) {
  * @param filename the target file to save the data in.
  */
 int database_export_table( struct table_info * table, char * filename ) {
+  return 0;
 }
 
 /**
@@ -259,6 +266,7 @@ int database_export_table( struct table_info * table, char * filename ) {
  * @param filename
  */
 int database_import_table( struct table_info * table, char * filename ) {
+  return 0;
 }
 
 /**
@@ -284,7 +292,7 @@ struct table_info * database_new_table( uint64_t item_size, uint64_t size ) {
     table->size    = 0;
     table->data    = NULL;
   }
-  pthread_rwlock_init( &(table->rwlock), NULL );
+//pthread_rwlock_init( &(table->rwlock), NULL );
   
   // create a primary index
   database_new_index( table, &database_hash );
@@ -313,9 +321,9 @@ struct index_info * database_new_index( struct table_info * table,
   index->function = function;
   index->size     = 0;
   index->data     = NULL;
-  pthread_rwlock_init( &(index->rwlock), NULL );
+//pthread_rwlock_init( &(index->rwlock), NULL );
 
-  pthread_rwlock_rdlock( &(table->rwlock ) );
+//pthread_rwlock_rdlock( &(table->rwlock ) );
   
   database_build_index( index );
   
@@ -325,35 +333,42 @@ struct index_info * database_new_index( struct table_info * table,
     table->index->next = index;
   }
   
-  pthread_rwlock_unlock( &(table->rwlock) );
+//pthread_rwlock_unlock( &(table->rwlock) );
   
   return index;
 }
 
 
 int database_table_insert( struct table_info * table, void * buffer ) {
+  return 0;
 }
 
 int database_table_select( struct table_info * table, uint64_t key,
                            void * buffer ) {
+  return 0;
 }
 
 int database_table_update( struct table_info * table, uint64_t key,
                            void * buffer ) {
+  return 0;
 }
 
 int database_table_delete( struct table_info * table, uint64_t key ) {
+  return 0;
 }
 
 
 
 int database_index_select( struct index_info * index, uint64_t key,
                            void * buffer ) {
+  return 0;
 }
 
 int database_index_update( struct index_info * index, uint64_t key,
                            void * buffer ) {
+  return 0;
 }
 
 int database_index_delete( struct index_info * index, uint64_t key ) {
+  return 0;
 }

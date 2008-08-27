@@ -4,15 +4,19 @@
 #include "tests.h"
 
 int test_fail() {
+  return 0;
 }
 
 int test_success() {
+  return 0;
 }
 
 int test_output() {
+  return 0;
 }
 
 int test_require( struct test_info * test ) {
+  return 0;
 }
 
 int run_test( struct test_info * test ) {
