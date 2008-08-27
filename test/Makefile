@@ -4,11 +4,6 @@ OBJ_DIR = ../build/obj
 TMP_DIR = ../build/tmp
 BIN_DIR = ../build/bin
 
-CC = gcc
-CFLAGS = -I$(INC_DIR) -O2 -Wall
-LDFLAGS = -lpthread
-MKDIR = mkdir -p
- 
 VPATH = $(INC_DIR)
 
 TEST_O = $(OBJ_DIR)/test.o \
