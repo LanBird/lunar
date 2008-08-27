@@ -4,10 +4,6 @@ OBJ_DIR = ../build/obj
 TMP_DIR = ../build/tmp
 BIN_DIR = ../build/bin
 
-CC = gcc
-CFLAGS = -I$(INC_DIR) -O2 -Wall
-LDFLAGS = -lpthread
- 
 VPATH = $(INC_DIR)
 
 CORE_O =   $(OBJ_DIR)/database.o \

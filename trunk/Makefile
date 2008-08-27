@@ -6,8 +6,8 @@ TMP_DIR = build/tmp
 BIN_DIR = build/bin
 
 CC = gcc
-CFLAGS = -I$(INC_DIR) -O2 -Wall
-LIBS = pthread
+CFLAGS = -I../$(INC_DIR) -O2 -Wall
+LDFLAGS = -lpthread
 MKDIR = mkdir -p
  
 .PHONY:	all build test install documentation
@@ -23,10 +23,10 @@ directories:
 	@$(MKDIR) $(BIN_DIR)
 
 build: directories
-	cd $(SRC_DIR) && $(MAKE) bin
+	cd $(SRC_DIR) && $(MAKE) bin CC="$(CC)" CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 
 test:	directories build
-	cd $(TST_DIR) && $(MAKE) bin
+	cd $(TST_DIR) && $(MAKE) bin CC="$(CC)" CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 	./$(BIN_DIR)/lunar_tests
 
 install:	build test
