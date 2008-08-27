@@ -1,0 +1,5 @@
+#ifndef _LUNAR_LANGUAGE_BINDING_H
+#define _LUNAR_LANGUAGE_BINDING_H
+
+#endif
+

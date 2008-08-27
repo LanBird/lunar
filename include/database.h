@@ -22,7 +22,7 @@ struct table_info {
   uint64_t item_size;        // size of each record in bytes
   uint64_t size;             // available space (measured in items)
   uint64_t items;            // current fill state
-  pthread_rwlock_t rwlock;   // lock for read/write access
+//pthread_rwlock_t rwlock;   // lock for read/write access
   uint64_t * data;           // the actual data
 };
 
@@ -39,7 +39,7 @@ struct index_info {
   uint64_t size;                 // available space (measured in items)
   uint64_t items;                // current fill state
   uint64_t (* function)(void *, uint64_t, int); // hashing function
-  pthread_rwlock_t rwlock;       // lock for read/write access
+//pthread_rwlock_t rwlock;       // lock for read/write access
   uint64_t * data;               // the actual data
 };
 

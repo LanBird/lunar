@@ -31,3 +31,4 @@ int sha1_test() {
   
   return errors;
 }
+
