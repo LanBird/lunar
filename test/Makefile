@@ -11,16 +11,23 @@ MKDIR = mkdir -p
  
 VPATH = $(INC_DIR)
 
-OBJ = $(OBJ_DIR)/test.o \
-      $(OBJ_DIR)/test_database.o \
-      $(OBJ_DIR)/test_intmath.o \
-      $(OBJ_DIR)/test_sha1.o
+TEST_O = $(OBJ_DIR)/test.o \
+         $(OBJ_DIR)/test_database.o \
+         $(OBJ_DIR)/test_intmath.o \
+         $(OBJ_DIR)/test_sha1.o
 
-BIN = $(BIN_DIR)/lunar_tests
+EXT_O  = $(OBJ_DIR)/database.o \
+         $(OBJ_DIR)/intmath.o \
+         $(OBJ_DIR)/sha1.o
+
+ALL_O  = $(TEST_O)
+       
+
+BIN    = $(BIN_DIR)/lunar_tests
 
 .PHONY:	obj bin
 
-obj:	$(OBJ)
+obj:	$(ALL_O)
 bin:	$(BIN)
 
 $(OBJ_DIR)/test.o:	test.c test.h tests.h
@@ -32,7 +39,7 @@ $(BIN_DIR)/lunar_tests:	$(OBJ_DIR)/test.o \
   $(OBJ_DIR)/test_database.o $(OBJ_DIR)/database.o \
   $(OBJ_DIR)/test_intmath.o  $(OBJ_DIR)/intmath.o \
   $(OBJ_DIR)/test_sha1.o     $(OBJ_DIR)/sha1.o
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) $(TEST_O) $(EXT_O) -o $@
 
-$(OBJ):
-	$(CC) -c $(CFLAGS) $< -o $@
+$(ALL_O):
+	$(CC) -c $(CFLAGS) $$(basename $@ | sed 's/.o/.c/') -o $@
