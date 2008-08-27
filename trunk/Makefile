@@ -14,12 +14,18 @@ MKDIR = mkdir -p
 
 all:	build test install
 
-build:
-	cd $(SRC_DIR) && $(MAKE) obj
+clean:
+	@rm $(OBJ_DIR)/*.o
+
+directories:
+	@$(MKDIR) $(OBJ_DIR)
+	@$(MKDIR) $(TMP_DIR)
+	@$(MKDIR) $(BIN_DIR)
+
+build: directories
 	cd $(SRC_DIR) && $(MAKE) bin
 
-test:	build
-	cd $(TST_DIR) && $(MAKE) obj
+test:	directories build
 	cd $(TST_DIR) && $(MAKE) bin
 	./$(BIN_DIR)/lunar_tests
 

@@ -9,33 +9,30 @@ CFLAGS = -I$(INC_DIR) -O2 -Wall
 LDFLAGS = -lpthread
 MKDIR = mkdir -p
  
-VPATH = $(OBJ_DIR):$(INC_DIR):$(SRC_DIR)
+VPATH = $(INC_DIR)
 
-OBJ = test.o \
-      test_database.o \
-      test_intmath.o \
-      test_sha1.o
+OBJ = $(OBJ_DIR)/test.o \
+      $(OBJ_DIR)/test_database.o \
+      $(OBJ_DIR)/test_intmath.o \
+      $(OBJ_DIR)/test_sha1.o
 
-BIN = lunar_tests
+BIN = $(BIN_DIR)/lunar_tests
 
 .PHONY:	obj bin
 
 obj:	$(OBJ)
 bin:	$(BIN)
 
-lunar_tests:	test.o \
-  test_database.o database.o \
-  test_intmath.o  intmath.o \
-  test_sha1.o     sha1.o
-	@$(MKDIR) $(BIN_DIR)
-	$(CC) $(LDFLAGS) $? -o $(BIN_DIR)/$@
+$(OBJ_DIR)/test.o:	test.c test.h tests.h
+$(OBJ_DIR)/test_database.o:	test_database.c database.h
+$(OBJ_DIR)/test_intmath.o:	test_intmath.c intmath.h
+$(OBJ_DIR)/test_sha1.o:	test_sha1.c sha1.h
 
+$(BIN_DIR)/lunar_tests:	$(OBJ_DIR)/test.o \
+  $(OBJ_DIR)/test_database.o $(OBJ_DIR)/database.o \
+  $(OBJ_DIR)/test_intmath.o  $(OBJ_DIR)/intmath.o \
+  $(OBJ_DIR)/test_sha1.o     $(OBJ_DIR)/sha1.o
+	$(CC) $(LDFLAGS) $^ -o $@
 
-test.o:	test.c test.h tests.h
-test_database.o:	test_database.c database.h
-test_intmath.o:	test_intmath.c intmath.h
-test_sha1.o:	test_sha1.c sha1.h
-
-.c.o:
-	@$(MKDIR) $(OBJ_DIR)
-	$(CC) -c $(CFLAGS) $< -o $(OBJ_DIR)/$@
+$(OBJ):
+	$(CC) -c $(CFLAGS) $< -o $@
