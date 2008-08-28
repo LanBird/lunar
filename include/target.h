@@ -1,7 +1,7 @@
 #ifndef _LUNAR_TARGET_H
 #define _LUNAR_TARGET_H
 
-#include "types.h"
+#include <stdint.h>
 #include "file.h"
 
 // TARGET FLAGS:
@@ -13,19 +13,19 @@
 //  32 =                 (reserved for future use)
 //  64 = user 1          (freely usable flag)
 // 128 = user 2          (freely usable flag)
-extern byte_t TARGET_FLAG_UP_TO_DATE;
-extern byte_t TARGET_FLAG_FORCE_REBUILD;
-extern byte_t TARGET_FLAG_SKIP;
-extern byte_t TARGET_FLAG_FAILED;
-extern byte_t TARGET_FLAG_UNHASHED;
-extern byte_t TARGET_FLAG_UNUSED;
-extern byte_t TARGET_FLAG_USER_1;
-extern byte_t TARGET_FLAG_USER_2;
+extern uint8_t TARGET_FLAG_UP_TO_DATE;
+extern uint8_t TARGET_FLAG_FORCE_REBUILD;
+extern uint8_t TARGET_FLAG_SKIP;
+extern uint8_t TARGET_FLAG_FAILED;
+extern uint8_t TARGET_FLAG_UNHASHED;
+extern uint8_t TARGET_FLAG_UNUSED;
+extern uint8_t TARGET_FLAG_USER_1;
+extern uint8_t TARGET_FLAG_USER_2;
 
 struct target_info {
   char   * name;
-  byte_t   hash[5];
-  byte_t   flags;
+  uint8_t  hash[5];
+  uint8_t  flags;
   struct file_info   * file;
   struct target_info * dependencies;
   struct file_info   * input_files;

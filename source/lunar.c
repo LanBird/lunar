@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
-#include "types.h"
 #include "sha1.h"
 #include "intmath.h"
 #include "database.h"

@@ -1,14 +1,13 @@
-#ifndef _LUNAR_DATABASE_H
-#define _LUNAR_DATABASE_H
-
 /**
  * The database module stores arbitary records in tables and provides a general
  * mechanism for concurrent access.
  */
 
-#include <pthread.h>
+#ifndef _LUNAR_DATABASE_H
+#define _LUNAR_DATABASE_H
 
-#include "types.h"
+#include <pthread.h>
+#include <stdint.h>
 
 /**
  * A table stores data linearly and uses a primary index (the first in the
