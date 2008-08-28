@@ -25,7 +25,7 @@ struct file_info {
   char *    name;
   uint8_t   hash[5];
   uint8_t   flags;
-  //date_t  modified_date;
+  time_t    modified_time;
   uint64_t  size;
 };
 

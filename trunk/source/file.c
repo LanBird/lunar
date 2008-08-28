@@ -17,7 +17,7 @@ struct file_info * file_create( char * filename ) {
   f->flags = FILE_FLAG_NON_EXISTENT | FILE_FLAG_UNHASHED;
   // create hash -> reference from filename
   // try to open file, unset FILE_FLAG_NON_EXISTENT
-  // set modified_date
+  // set modified_time
   // set size
   return f;
 }
