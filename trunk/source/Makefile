@@ -1,11 +1,14 @@
+# directory setup
 SRC_DIR = .
 INC_DIR = ../include
 OBJ_DIR = ../build/obj
 TMP_DIR = ../build/tmp
 BIN_DIR = ../build/bin
 
+# use include directory when looking for input .h files
 VPATH = $(INC_DIR)
 
+# objects present in all lunar binaries
 CORE_O =   $(OBJ_DIR)/database.o \
            $(OBJ_DIR)/deflate.o \
            $(OBJ_DIR)/file.o \
@@ -20,6 +23,7 @@ CLIENT_O = $(OBJ_DIR)/client.o
 
 SERVER_O = $(OBJ_DIR)/server.o
 
+# objects for executables
 LUNAR_O =  $(OBJ_DIR)/lunar.o \
            $(CLIENT_O) \
            $(CORE_O)
@@ -28,9 +32,11 @@ LUNARD_O = $(OBJ_DIR)/lunard.o \
            $(SERVER_O) \
            $(CORE_O)
 
+# all objects that can be rebuilt
 ALL_O    = $(CORE_O) $(CLIENT_O) $(SERVER_O) \
            $(OBJ_DIR)/lunar.o $(OBJ_DIR)/lunard.o
 
+# available executables
 BIN = $(BIN_DIR)/lunar \
       $(BIN_DIR)/lunard
 
@@ -39,11 +45,7 @@ BIN = $(BIN_DIR)/lunar \
 obj:	$(ALL_O)
 bin:	$(BIN)
 
-$(BIN_DIR)/lunar:	$(LUNAR_O)
-	$(CC) $(LDFLAGS) $(LUNAR_O) -o $@
-$(BIN_DIR)/lunard:	$(LUNARD_O)
-	$(CC) $(LDFLAGS) $(LUNARD_O) -o $@
-
+# dependencies for object compilation
 $(OBJ_DIR)/client.o:	client.c client.h
 $(OBJ_DIR)/database.o:	database.c database.h
 $(OBJ_DIR)/deflate.o:	deflate.c deflate.h
@@ -58,5 +60,15 @@ $(OBJ_DIR)/server.o:	server.c server.h
 $(OBJ_DIR)/sha1.o:	sha1.c sha1.h
 $(OBJ_DIR)/target.o:	target.c target.h
 
+# object compilation rule
 $(ALL_O):
-	$(CC) -c $(CFLAGS) $$(basename $@ | sed 's/.o/.c/') -o $@
+	$(CC) -c $(CFLAGS) $$(basename $@ | sed "s'\.o'.c';") -o $@
+
+# executable compilation rules
+# lunar
+$(BIN_DIR)/lunar:	$(LUNAR_O)
+	$(CC) $(LDFLAGS) $(LUNAR_O) -o $@
+# lunard
+$(BIN_DIR)/lunard:	$(LUNARD_O)
+	$(CC) $(LDFLAGS) $(LUNARD_O) -o $@
+

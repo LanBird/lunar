@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include "error.h"
 #include "intmath.h"

@@ -1,7 +1,7 @@
 #ifndef _LUNAR_FILE_H
 #define _LUNAR_FILE_H
 
-#include "types.h"
+#include <stdint.h>
 
 // FILE FLAGS:
 //   1 = up to date      (file doesn't need an update)
@@ -12,20 +12,20 @@
 //  32 =                 (reserved for future use)
 //  64 = user 1          (freely usable flag)
 // 128 = user 2          (freely usable flag)
-extern byte_t FILE_FLAG_UP_TO_DATE;
-extern byte_t FILE_FLAG_FORCE_UPDATE;
-extern byte_t FILE_FLAG_SKIP;
-extern byte_t FILE_FLAG_NON_EXISTENT;
-extern byte_t FILE_FLAG_UNHASHED;
-// extern byte_t FILE_FLAG_UNUSED;
-extern byte_t FILE_FLAG_USER_1;
-extern byte_t FILE_FLAG_USER_2;
+extern uint8_t FILE_FLAG_UP_TO_DATE;
+extern uint8_t FILE_FLAG_FORCE_UPDATE;
+extern uint8_t FILE_FLAG_SKIP;
+extern uint8_t FILE_FLAG_NON_EXISTENT;
+extern uint8_t FILE_FLAG_UNHASHED;
+// extern uint8_t FILE_FLAG_UNUSED;
+extern uint8_t FILE_FLAG_USER_1;
+extern uint8_t FILE_FLAG_USER_2;
 
 struct file_info {
   char *    name;
-  byte_t    hash[5];
-  byte_t    flags;
-  date_t    modified_date;
+  uint8_t   hash[5];
+  uint8_t   flags;
+  //date_t  modified_date;
   uint64_t  size;
 };
 

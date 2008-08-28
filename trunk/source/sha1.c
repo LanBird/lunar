@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
-#include "types.h"
 #include "sha1.h"
 
-int sha1( const byte_t * buffer, const uint64_t length, uint32_t h[] ) {
+int sha1( const uint8_t * buffer, const uint64_t length, uint32_t h[] ) {
   h[0] = 0x67452301;
   h[1] = 0xefcdab89;
   h[2] = 0x98badcfe;

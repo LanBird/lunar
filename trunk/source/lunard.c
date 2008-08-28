@@ -1,5 +1,5 @@
-#include <unistd.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "types.h"
 #include "server.h"
@@ -12,7 +12,6 @@ int main(void) {
   while( 1 ) {
     printf( "." );
     fflush( stdout );
-    sleep( 1 );
   }
   return 0;
 }
