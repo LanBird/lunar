@@ -1,5 +1,6 @@
+#include <stdint.h>
+
 #include "test.h"
-#include "types.h"
 #include "intmath.h"
 
 int intmath_test();

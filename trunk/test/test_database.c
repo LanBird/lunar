@@ -1,5 +1,6 @@
+#include <stdint.h>
+
 #include "test.h"
-#include "types.h"
 #include "sha1.h"
 #include "database.h"
 
@@ -21,7 +22,7 @@ struct index_info * database_test_index;
 
 uint64_t database_test_hash( void * buffer, uint64_t size, int pass ) {
   uint64_t r=0;
-  r = *( (uint64_t *) buffer );
+  r = *( (uint64_t *) buffer ) + pass;
   return r;
 }
 
@@ -34,7 +35,7 @@ int database_set_up() {
 int database_test() {
   int      errors = 0;
 
-  uint64_t test_input[ 5 ] = { 123, 456, 789, 0, 999 };
+  uint64_t test_input[ 5 ]  = { 123, 456, 789, 0, 999 };
   uint64_t test_output[ 5 ] = { 0, 0, 0, 0, 0 };
   
   errors += database_table_insert( database_test_table, &test_input[ 0 ] );
