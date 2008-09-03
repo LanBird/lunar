@@ -5,8 +5,6 @@
 #ifndef _LUNAR_STORAGE_H
 #define _LUNAR_STORAGE_H
 
-#include <pthread.h>
-
 typedef struct storage_info * storage_t;
 
 storage_t storage_new();
@@ -15,10 +13,12 @@ int storage_alloc( storage_t storage, size_t size );
 int storage_free( storage_t storage );
 int storage_realloc( storage_t storage, size_t size );
 
-int storage_write( storage_t storage, void * buffer, size_t bytes );
-int storage_read( storage_t storage, void * buffer, size_t bytes );
-int storage_copy( storage_t storage, storage_t source, size_t start, size_t bytes );
-int storage_clone( storage_t storage, storage_t source );
+int storage_write( storage_t storage, size_t start, void * buffer, size_t bytes );
+int storage_read( storage_t storage, size_t start, void * buffer, size_t bytes );
+
+int storage_clone( storage_t destination, storage_t source );
+int storage_copy( storage_t destination, size_t d_start,
+                  storage_t source, size_t s_start, size_t bytes );
 
 int storage_write_lock( storage_t storage );
 int storage_write_trylock( storage_t storage );
