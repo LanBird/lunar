@@ -1,4 +1,6 @@
 #include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 #include "storage.h"
@@ -19,28 +21,74 @@ struct storage_info {
   int waiting;
 };
 
-storage_t storage_new( storage_t size ) {
-  return NULL;
+storage_t storage_new( void ) {
+  struct storage_info * storage;
+  storage = (struct storage_info *) malloc( sizeof( struct storage_info ) );
+  if( storage == NULL ) {
+    return NULL;
+  }
+  storage->size = 0;
+  storage->data = NULL;
+  pthread_mutex_init( &storage->read, NULL );
+  pthread_mutex_init( &storage->write, NULL );
+  pthread_mutex_init( &storage->structure, NULL );
+  pthread_cond_init( &storage->access, NULL );
+  storage->reading = 0;
+  storage->waiting = 0;
+  return storage;
 }
 
 int storage_alloc( storage_t storage, size_t size ) {
+  void * old_data = storage->data;
+  storage->data = malloc( size );
+  if( storage->data == NULL ) {
+    storage->data = old_data;
+    return 1;
+  }
+  if( old_data != NULL ) {
+    free( old_data );
+  }
+  storage->size = size;
   return 0;
 }
 
 int storage_free( storage_t storage ) {
+  free( storage->data );
+  storage->size = 0;
   return 0;
 }
 
 int storage_realloc( storage_t storage, size_t size ) {
+  storage->data = realloc( storage->data, size );
+  storage->size = size;
   return 0;
 }
 
-int storage_write( storage_t storage, void * buffer, size_t bytes ) {
+int storage_write( storage_t storage, size_t start, void * buffer, size_t bytes ) {
+  storage_write_lock( storage );
+  memcpy( storage->data + start, buffer, bytes );
+  storage_write_unlock( storage );
   return 0;
 }
 
-int storage_read( storage_t storage, void * buffer, size_t bytes ) {
+int storage_read( storage_t storage, size_t start, void * buffer, size_t bytes ) {
+  storage_read_lock( storage );
+  memcpy( buffer, storage->data + start, bytes );
+  storage_read_unlock( storage );
   return 0;
+}
+
+int storage_clone( storage_t destination, storage_t source ) {
+  return storage_copy( destination, 0, source, 0, source->size );
+}
+
+int storage_copy( storage_t destination, size_t d_start,
+                  storage_t source, size_t s_start, size_t bytes ) {
+  int r = 0;
+  storage_read_lock( source );
+  r = storage_write( destination, d_start, source->data + s_start, bytes );
+  storage_read_unlock( source );
+  return r;
 }
 
 /**
