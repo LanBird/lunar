@@ -2,17 +2,44 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <errno.h>
 
-#include "error.h"
 #include "intmath.h"
 #include "sha1.h"
+#include "storage.h"
 #include "database.h"
+
+/**
+ * A table stores data linearly and uses a primary index (the first in the
+ * index list) to reference data.
+ * The database module keeps a chained list of tables to properly clean up on
+ * shutdown or other events.
+ */
+struct table_info {
+  struct table_info * next;  // the next table in the list
+  struct index_info * index; // the primary index followed by a list of indices
+  uint64_t item_size;        // size of each record in bytes
+  uint64_t size;             // available space (measured in items)
+  uint64_t items;            // current fill state
+  storage_t data;            // the actual table data
+};
+
+/**
+ * An index dynamically maps generated keys (specified by a function) to the
+ * keys of its table's primary index.
+ * Primary indices store the row number of the record, secondary indices, while
+ * (user indices) store the associated primary index value.
+ */
+struct index_info {
+  struct table_info table;
+  uint64_t (* function)(void *, uint64_t, int); // hashing function
+};
 
 /**
  * The module has to keep track of existing tables to do proper cleanup on
  * various events.
  */
-struct table_info * database_tables  = NULL;
+struct table_info * database_tables = NULL;
 
 /**
  * Default hashing function. Used for placing the record into the hashmap.
@@ -24,7 +51,7 @@ struct table_info * database_tables  = NULL;
 uint64_t database_hash( void * buffer, uint64_t size, int pass ) {
   uint32_t hash[5];
   sha1( buffer, size, hash );
-  return ( (uint64_t) hash[pass%5] ) << 32 | hash[(pass+3)%5];
+  return ( (uint64_t) hash[pass%5] ) << 32 | hash[(pass*3)%5];
 }
 
 /**
@@ -276,7 +303,7 @@ int database_import_table( struct table_info * table, char * filename ) {
  * @param size the initial number of available rows.
  * @return a pointer to the new table structure.
  */
-struct table_info * database_new_table( uint64_t item_size, uint64_t size ) {
+table_t database_new_table( uint64_t item_size, uint64_t size ) {
   struct table_info * table;
   if( item_size < 1 ) {
     return NULL;
