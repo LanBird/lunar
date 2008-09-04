@@ -13,14 +13,17 @@
 struct storage_info {
   size_t size;
   void * data;
-  pthread_mutex_t read;      // read lock (unlock causes signal on access)
-  pthread_mutex_t write;     // write lock (unlock causes broadcast on access)
-  pthread_mutex_t structure; // structural lock (for changes other than data)
-  pthread_cond_t  access;    // access condition
-  int reading;
-  int waiting;
+  pthread_mutex_t access;    // has to be locked when accessing struct
+  pthread_cond_t  available; // locks reached 0
+  int locks;                 // -1: exclusive, 0: not locked, >0: shared
+  int waiting;               // number of threads waiting for free condition
 };
 
+/**
+ * Allocate a new storage_info structure and return a pointer to the
+ * initialized struct as storage_t.
+ * @return a pointer (storage_t) to the new storage.
+ */
 storage_t storage_new( void ) {
   struct storage_info * storage;
   storage = (struct storage_info *) malloc( sizeof( struct storage_info ) );
@@ -29,15 +32,20 @@ storage_t storage_new( void ) {
   }
   storage->size = 0;
   storage->data = NULL;
-  pthread_mutex_init( &storage->read, NULL );
-  pthread_mutex_init( &storage->write, NULL );
-  pthread_mutex_init( &storage->structure, NULL );
-  pthread_cond_init( &storage->access, NULL );
-  storage->reading = 0;
+  pthread_mutex_init( &storage->access, NULL );
+  pthread_cond_init( &storage->available, NULL );
+  storage->locks = 0;
   storage->waiting = 0;
   return storage;
 }
 
+/**
+ * Allocate memory for the storage's load. If the storage already has data
+ * the old data is free'd.
+ * @param storage the storage to carry the memory.
+ * @param size the number of bytes to be allocated.
+ * @return an errorcode or 0 on success.
+ */
 int storage_alloc( storage_t storage, size_t size ) {
   void * old_data = storage->data;
   storage->data = malloc( size );
@@ -52,18 +60,35 @@ int storage_alloc( storage_t storage, size_t size ) {
   return 0;
 }
 
+/**
+ * Free storage's memory.
+ * @param storage the storage to be free'd.
+ */
 int storage_free( storage_t storage ) {
   free( storage->data );
   storage->size = 0;
   return 0;
 }
 
+/**
+ * Reallocate memory for the storage's load.
+ * @param storage the storage to carry the memory.
+ * @param size the number of bytes to be allocated.
+ * @return an errorcode or 0 on success.
+ */
 int storage_realloc( storage_t storage, size_t size ) {
   storage->data = realloc( storage->data, size );
   storage->size = size;
   return 0;
 }
 
+/**
+ * Write bytes bytes from buffer to start in storage.
+ * @param storage the storage to be written to.
+ * @param start the position where the write should be performed.
+ * @param buffer the source from which the input data should be taken.
+ * @param bytes the number of bytes to be written.
+ */
 int storage_write( storage_t storage, size_t start, void * buffer, size_t bytes ) {
   storage_write_lock( storage );
   memcpy( storage->data + start, buffer, bytes );
@@ -71,6 +96,13 @@ int storage_write( storage_t storage, size_t start, void * buffer, size_t bytes 
   return 0;
 }
 
+/**
+ * Read bytes bytes from start in storage to buffer.
+ * @param storage the storage to be read from.
+ * @param start the position from which the read should be started.
+ * @param buffer the target to which the read bytes should be written.
+ * @param bytes the number of bytes to be read.
+ */
 int storage_read( storage_t storage, size_t start, void * buffer, size_t bytes ) {
   storage_read_lock( storage );
   memcpy( buffer, storage->data + start, bytes );
@@ -78,10 +110,25 @@ int storage_read( storage_t storage, size_t start, void * buffer, size_t bytes )
   return 0;
 }
 
+/**
+ * Copy all data from one storage to another. Resize the destinantion
+ * storage appropiately.
+ * @param destination the "clone"
+ * @param source the original storage where data should be copied from.
+ */
 int storage_clone( storage_t destination, storage_t source ) {
+  storage_realloc( destination, source->size );
   return storage_copy( destination, 0, source, 0, source->size );
 }
 
+/**
+ * Copy bytes bytes from s_start in source to d_start in destination.
+ * @param destination the storage to write to.
+ * @param d_start the position to write to.
+ * @param source the storage to  read from.
+ * @param s_start the position to start reading.
+ * @param bytes the number of bytes to read.
+ */
 int storage_copy( storage_t destination, size_t d_start,
                   storage_t source, size_t s_start, size_t bytes ) {
   int r = 0;
@@ -92,108 +139,98 @@ int storage_copy( storage_t destination, size_t d_start,
 }
 
 /**
- * Prerequisite locks: none
- * Used locks: structure, read, write
- * Acquired locks on exit: write
+ * Lock the storage exclusively (for writing).
+ * @param storage the storage to be locked.
  */
 int storage_write_lock( storage_t storage ) {
-  pthread_mutex_lock( &storage->structure );
-  pthread_mutex_lock( &storage->write );
-  while( pthread_mutex_trylock( &storage->read ) == EBUSY ) {
+  pthread_mutex_lock( &storage->access );
+  while( storage->locks != 0 ) {
     storage->waiting++;
-    pthread_cond_wait( &storage->access, &storage->structure );
+    pthread_cond_wait( &storage->available, &storage->access );
     storage->waiting--;
   }
-  pthread_mutex_unlock( &storage->structure );
+  storage->locks = -1;
+  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 
 /**
- * Prerequisite locks: none
- * Used locks: structure, write, read
- * Acquired locks on successful exit: write
- * Acquired locks on failure: none
+ * Try to lock the storage exclusively (for writing).
+ * @param storage the storage to be locked.
+ * @return EBUSY if already locked. Zero otherwise.
  */
 int storage_write_trylock( storage_t storage ) {
-  if( pthread_mutex_trylock( &storage->structure ) == EBUSY ) {
+  if( pthread_mutex_trylock( &storage->access ) == EBUSY ) {
     return EBUSY;
   }
-  if( pthread_mutex_trylock( &storage->write ) == EBUSY ) {
-    pthread_mutex_unlock( &storage->structure );
+  if( storage->locks != 0 ) {
+    pthread_mutex_unlock( &storage->access );
     return EBUSY;
   }
-  if( pthread_mutex_trylock( &storage->read ) == EBUSY ) {
-    pthread_mutex_unlock( &storage->write );
-    pthread_mutex_unlock( &storage->structure );
-    return EBUSY;
-  }
-  pthread_mutex_unlock( &storage->structure );
+  storage->locks = -1;
+  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 
 /**
- * Prerequisite locks: write
- * Used locks: structure
- * Acquired locks on exit: none
+ * Revoke the exclusive lock.
+ * @param storage the storage to be unlocked.
  */
 int storage_write_unlock( storage_t storage ) {
-  pthread_mutex_lock( &storage->structure );
-  pthread_mutex_unlock( &storage->write );
-  if( storage->waiting > 0 ) {
-    pthread_cond_broadcast( &storage->access );
-  }
-  pthread_mutex_unlock( &storage->structure );
+  pthread_mutex_lock( &storage->access );
+  storage->locks = 0;
+  pthread_mutex_unlock( &storage->access );
+  pthread_cond_signal( &storage->available );
   return 0;
 }
 
 /**
- * Prerequisite locks: none
- * Used locks: structure, read, write
- * Acquired locks on exit: read
+ * Lock the storage shared (for reading).
+ * @param storage the storage to be locked.
  */
 int storage_read_lock( storage_t storage ) {
-  pthread_mutex_lock( &storage->structure );
-  pthread_mutex_lock( &storage->write );
-  pthread_mutex_lock( &storage->read );
-  storage->reading++;
-  pthread_mutex_unlock( &storage->write );
-  pthread_mutex_unlock( &storage->structure );
+  pthread_mutex_lock( &storage->access );
+  while( storage->locks == -1 || storage->waiting > 0 ) {
+    storage->waiting++;
+    pthread_cond_wait( &storage->available, &storage->access );
+    storage->waiting--;
+  }
+  storage->locks++;
+  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 
 /**
- * Prerequisite locks: none
- * Used locks: structure, write, read
- * Acquired locks on successful exit: read
- * Acquired locks on failure: none
+ * Try to lock the storage shared (for reading).
+ * @param storage the storage to be locked.
+ * @return EBUSY if the storage is locked exclusively or if the access lock
+ * can't be acquired. Zero otherwise.
  */
 int storage_read_trylock( storage_t storage ) {
-  if( pthread_mutex_trylock( &storage->structure ) == EBUSY ) {
+  if( pthread_mutex_trylock( &storage->access ) == EBUSY ) {
     return EBUSY;
   }
-  if( pthread_mutex_trylock( &storage->write ) == EBUSY ) {
-    pthread_mutex_unlock( &storage->structure );
+  if( storage->locks == -1 ) {
+    pthread_mutex_unlock( &storage->access );
     return EBUSY;
   }
-  storage->reading++;
-  pthread_mutex_unlock( &storage->write );
-  pthread_mutex_unlock( &storage->structure );
+  storage->locks++;
+  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 
 /**
- * Prerequisite locks: read
- * Used locks: structure
- * Acquired locks on exit: none
+ * Revoke one shared lock. Signal a waiting thread if there are no other locks
+ * left.
+ * @param storage the storage to be unlocked.
  */
 int storage_read_unlock( storage_t storage ) {
-  pthread_mutex_lock( &storage->structure );
-  storage->reading--;
-  pthread_mutex_unlock( &storage->read );
-  if( storage->waiting > 0 ) {
-    pthread_cond_signal( &storage->access );
+  pthread_mutex_lock( &storage->access );
+  storage->locks--;
+  if( storage->locks == 0 ) {
+    pthread_cond_signal( &storage->available );
   }
-  pthread_mutex_unlock( &storage->structure );
+  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 

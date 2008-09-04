@@ -10,14 +10,14 @@ VPATH = $(INC_DIR)
 
 # objects for the test framework
 TEST_O = $(OBJ_DIR)/test.o \
-         $(OBJ_DIR)/test_database.o \
          $(OBJ_DIR)/test_intmath.o \
-         $(OBJ_DIR)/test_sha1.o
+         $(OBJ_DIR)/test_sha1.o \
+         $(OBJ_DIR)/test_storage.o
 
 # external objects being tested
-EXT_O  = $(OBJ_DIR)/database.o \
-         $(OBJ_DIR)/intmath.o \
-         $(OBJ_DIR)/sha1.o
+EXT_O  = $(OBJ_DIR)/intmath.o \
+         $(OBJ_DIR)/sha1.o \
+         $(OBJ_DIR)/storage.o
 
 # all objects that can be rebuild
 ALL_O  = $(TEST_O)
@@ -31,19 +31,18 @@ obj:	$(ALL_O)
 bin:	$(BIN)
 
 # dependencies for object compilation
-$(OBJ_DIR)/test.o:	test.c test.h tests.h
-$(OBJ_DIR)/test_database.o:	test_database.c database.h
-$(OBJ_DIR)/test_intmath.o:	test_intmath.c intmath.h
-$(OBJ_DIR)/test_sha1.o:	test_sha1.c sha1.h
+$(OBJ_DIR)/test.o:	test.c test.h tests.h test.h
+$(OBJ_DIR)/test_database.o:	test_database.c database.h test.h storage.h sha1.h intmath.h
+$(OBJ_DIR)/test_intmath.o:	test_intmath.c intmath.h test.h
+$(OBJ_DIR)/test_sha1.o:	test_sha1.c sha1.h test.h
+$(OBJ_DIR)/test_storage.o:	test_storage.c database.h test.h
 
 # object compilation rule
 $(ALL_O):
-	$(CC) -c $(CFLAGS) $$(basename $@ | sed 's/.o/.c/') -o $@
+	$(CC) -c $(CFLAGS) $$(basename $@ | sed "s'\.o'.c';") -o $@
 
 # executable compilation rule
 $(BIN_DIR)/lunar_tests:	$(OBJ_DIR)/test.o \
-  $(OBJ_DIR)/test_database.o $(OBJ_DIR)/database.o \
-  $(OBJ_DIR)/test_intmath.o  $(OBJ_DIR)/intmath.o \
-  $(OBJ_DIR)/test_sha1.o     $(OBJ_DIR)/sha1.o
+  $(TEST_O) $(EXT_O)
 	$(CC) $(LDFLAGS) $(TEST_O) $(EXT_O) -o $@
 
