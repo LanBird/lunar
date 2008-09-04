@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "types.h"
 #include "server.h"
 #include "lunard.h"
 

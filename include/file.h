@@ -2,6 +2,7 @@
 #define _LUNAR_FILE_H
 
 #include <stdint.h>
+#include <time.h>
 
 // FILE FLAGS:
 //   1 = up to date      (file doesn't need an update)
