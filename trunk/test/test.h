@@ -1,22 +1,23 @@
 #ifndef _LUNAR_TEST_H
 #define _LUNAR_TEST_H
 
+#include <stdarg.h>
+
 struct test_info {
   char * name;
   char * filename;
-  int (* set_up)();
-  int (* run)();
-  int (* tear_down)();
-  int state;
+  void (* set_up)();
+  void (* run)();
+  void (* tear_down)();
+  int errors;
+  int warnings;
 };
 
-int test_fail();
-int test_success();
+void test_printf( const char * message, ... );
+void test_warning( const char * message );
+void test_error( const char * message );
 
-int test_output();
-int test_require( struct test_info * test );
-
-int test_run( struct test_info * test );
+void test_run( struct test_info * test );
 
 #endif
 
