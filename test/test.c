@@ -1,50 +1,54 @@
 #include <stdio.h>
+#include <stdarg.h>
+#include <time.h>
+
 #include "test.h"
-// the tests.h file is generated on the fly when rebuilding this file
 #include "tests.h"
 
-int test_fail() {
-  return 0;
+struct test_info * current_test;
+const char * current_stage;
+time_t now;
+
+void test_print( const char * message ) {
+  printf( "   * %s\n", message );
 }
 
-int test_success() {
-  return 0;
+void test_error( const char * message ) {
+  current_test->errors++;
+  printf( "   * Error: %s\n", message );
 }
 
-int test_output() {
-  return 0;
+void test_warning( const char * message ) {
+  current_test->warnings++;
+  printf( "   * Warning: %s\n", message );
 }
 
-int test_require( struct test_info * test ) {
-  return 0;
-}
-
-int run_test( struct test_info * test ) {
-  int e0=0, e1=0, e2=0;
-  
+void test_run( struct test_info * test ) {
   printf( "Running test '%s' from file '%s'.\n", test->name, test->filename );
+  printf( "--------------------------------------------------------------------------------\n" );
+  current_test = test;
   
   if( test->set_up != 0 ) {
-    e0 = (*(test->set_up))();
-    if( e0 > 0 ) {
-      printf( "Error during setup. (#%i)\n", e0 );
-    }      
+    current_stage = "set up";
+    now = time( NULL );
+    printf( "  [%s] %s", current_stage, ctime( &now ) );
+    (*(test->set_up))();
   }
-  if( test->run != 0 && e0 == 0 ) {
-    e1 = (*(test->run))();
-    if( e1 > 0 ) {
-      printf( "Error during test. (#%i)\n", e1 );
-    } else {
-      printf( "Test succeeded.\n" );
+  if( test->errors == 0 ) {
+    if( test->run != 0 ) {
+      current_stage = "run";
+      printf( "  [%s] %s", current_stage, ctime( &now ) );
+      (*(test->run))();
+    }
+    if( test->tear_down != 0 ) {
+      current_stage = "tear down";
+      printf( "  [%s] %s", current_stage, ctime( &now ) );
+      (*(test->tear_down))();
     }
   }
-  if( test->tear_down != 0 && e0 == 0 ) {
-    e2 = (*(test->tear_down))();
-    if( e2 > 0 ) {
-      printf( "Error during tear down. (#%i)\n", e2 );
-    }
-  }
-  return e0 + e1 + e2;
+
+  printf( "--------------------------------------------------------------------------------\n" );
+  printf( "  Errors:   %i\n  Warnings: %i\n", test->errors, test->warnings );
 }
 
 int main( void ) {
@@ -63,7 +67,7 @@ int main( void ) {
   //       12345678901234567890123456789012345678901234567890123456789012345678901234567890
   for( i=0; i<test_count; i++ ) {
     printf( "-[ %2i of %2i ]-------------------------------------------------------------------\n", i+1, test_count );
-    run_test( tests[i] );
+    test_run( tests[i] );
   }  
   printf( "--------------------------------------------------------------------------------\n" );
   

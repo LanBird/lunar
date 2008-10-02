@@ -17,9 +17,9 @@ struct storage_info {
 #include "test.h"
 #include "storage.h"
 
-int storage_set_up();
-int storage_test();
-int storage_tear_down();
+void storage_set_up();
+void storage_test();
+void storage_tear_down();
 
 struct test_info test_storage= {
   "Storage",
@@ -58,7 +58,7 @@ void * storage_reader( void * data ) {
   return data;
 }
 
-int storage_set_up() {
+void storage_set_up() {
   shared_storage = storage_new();
   storage_alloc( shared_storage, 512 );
   storage_write( shared_storage, 0, valid1, 512 );
@@ -66,36 +66,48 @@ int storage_set_up() {
   pthread_create( &thread2, NULL, &storage_writer, (void *) valid2 );
   pthread_create( &thread3, NULL, &storage_reader, NULL );
   sleep( 1 );
-  return 0;
 }
 
-int storage_test() {
-  int errors = 0;
+void storage_test() {
   int i;
   int data1 = 0;
   int data2 = 0;
+  int turns = 4096;
 
-  for( i=0; i<2048; i++ ) {
+  for( i = 0; i < turns; i++ ) {
     storage_read( shared_storage, 0, buffer, 512 );
     if( strncmp( buffer, valid1, 512 ) == 0 ) {
       data1++;
     } else if( strncmp( buffer, valid2, 512 ) == 0 ) {
       data2++;
     } else {
-      errors++;
+      test_error( "Read inconsistent data!" );
     }
   }
 
-  if( writes < 5 || shares < 5 ) {
-    errors++; // maybe deadlocked?
+  if( data1 == 0 ) {
+    test_error( "First writer not scheduled." );
   }
-
-  return errors;
+  if( data2 == 0 ) {
+    test_error( "Second writer not scheduled." );
+  }
+  if( data1 + turns / 2 < data2 ) {
+    test_warning( "Unfair scheduling!" );
+  }
+  if( data2 + turns / 2 < data1 ) {
+    test_warning( "Unfair scheduling!" );
+  }
+  if( writes < 10 ) {
+    test_error( "Writers seem to be deadlocked." );
+  }
+  if( shares == 0 ) {
+    test_error( "Readers don't seem to share storage." );
+  }
 }
 
-int storage_tear_down() {
+void storage_tear_down() {
   finish = 1;
-  if( writes < 5 || shares < 5 ) {
+  if( writes < 5 ) {
     pthread_kill( thread1, 9 );
     pthread_kill( thread2, 9 );
     pthread_kill( thread3, 9 );
@@ -104,6 +116,6 @@ int storage_tear_down() {
     pthread_join( thread2, NULL );
     pthread_join( thread3, NULL );
   }
-  return 0;
+  sleep( 1 );
 }
 

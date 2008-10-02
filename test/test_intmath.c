@@ -1,9 +1,11 @@
 #include <stdint.h>
+#include <stdio.h>
+#include <math.h>
 
 #include "test.h"
 #include "intmath.h"
 
-int intmath_test();
+void intmath_test();
 
 struct test_info test_intmath = {
   "Integer Math",
@@ -14,34 +16,25 @@ struct test_info test_intmath = {
   0
 };
 
-int intmath_log2_test() {
-  int errors = 0;
-  if( intmath_log2( 0x8000000000000000ll ) != 63 ) {
-    errors++;
-  }
+void intmath_log2_test() {
   if( intmath_log2( 1 ) != 0 ) {
-    errors++;
+    test_error( "intmath_log2( 1 ) returned wrong result." );
   }
   if( intmath_log2( 255 ) != 7 ) {
-    errors++;
+    test_error( "intmath_log2( 255 ) returned wrong result." );
   }
   if( intmath_log2( 256 ) != 8 ) {
-    errors++;
+    test_error( "intmath_log2( 256 ) returned wrong result." );
   }
   if( intmath_log2( 0x8000000000000000ll ) != 63 ) {
-    errors++;
+    test_error( "intmath_log2( 0x8000000000000000ll ) returned wrong result." );
   }
   if( intmath_log2( 0x8fffffffffffffffll ) != 63 ) {
-    errors++;
+    test_error( "intmath_log2( 0x8fffffffffffffffll ) returned wrong result." );
   }  
-  return errors;
 }
 
-int intmath_test() {
-  int errors = 0;
-
-  errors += intmath_log2_test();
-  
-  return errors;
+void intmath_test() {
+  intmath_log2_test();
 }
 
