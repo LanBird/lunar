@@ -6,6 +6,7 @@
 
 #include "intmath.h"
 #include "sha1.h"
+#include "client.h"
 #include "storage.h"
 #include "database.h"
 
@@ -16,12 +17,12 @@
  * shutdown or other events.
  */
 struct table_info {
-  struct table_info * next;  // the next table in the list
-  struct index_info * index; // the primary index followed by a list of indices
-  uint64_t item_size;        // size of each record in bytes
-  uint64_t size;             // available space (measured in items)
-  uint64_t items;            // current fill state
-  storage_t data;            // the actual table data
+  table_t   next;      // the next table in the list
+  index_t   index;     // the primary index followed by a list of indices
+  storage_t data;      // the actual table data
+  uint64_t  item_size; // size of each record in bytes
+  uint64_t  size;      // available space (measured in items)
+  uint64_t  items;     // current fill state
 };
 
 /**
@@ -31,15 +32,26 @@ struct table_info {
  * (user indices) store the associated primary index value.
  */
 struct index_info {
-  struct table_info table;
-  uint64_t (* function)(void *, uint64_t, int); // hashing function
+  table_t   table; // indexed table
+  storage_t data;  // index data
+  uint64_t  size;  // hashspace size
+  uint64_t  items; // number of entries
+  uint64_t  (* function)(void *, uint64_t, int); // hashing function
+};
+
+/**
+ *
+ */
+struct record_header {
+  clientid_t edit;     // global identification of the editing thread
+  uint64_t   revision; // incremented after each edit
 };
 
 /**
  * The module has to keep track of existing tables to do proper cleanup on
  * various events.
  */
-struct table_info * database_tables = NULL;
+table_t database_tables = NULL;
 
 /**
  * Default hashing function. Used for placing the record into the hashmap.
@@ -63,27 +75,6 @@ uint64_t database_hash( void * buffer, uint64_t size, int pass ) {
  */
 uint64_t database_optimal_size( uint64_t items ) {
   return items + ( intmath_log2( items + 1 ) * 5 );
-}
-
-/**
- * Allocate space for tabledata.
- * @param items the number of rows to be reserved.
- * @param item_size the size of a record in bytes.
- * @return a pointer to the allocated memory.
- */
-uint64_t * database_allocate_table( uint64_t items, uint64_t item_size ) {
-  uint64_t item_space = (item_size | 0x07) + 1; // round up to whole 8
-  return (uint64_t *) valloc( items * item_space );
-}
-
-/**
- * Allocate space for indexdata.
- * @param items the number of rows to be reserved.
- * @return a pointer to the allocated memory.
- */
-uint64_t * database_allocate_index( uint64_t items ) {
-  uint64_t item_space = sizeof( uint64_t ) * 2; // key & reference are uint64_t
-  return (uint64_t *) valloc( items * item_space );
 }
 
 /**

@@ -9,6 +9,8 @@ typedef struct storage_info * storage_t;
 
 storage_t storage_new();
 
+int storage_chain( storage_t front, storage_t back );
+
 int storage_alloc( storage_t storage, size_t size );
 int storage_free( storage_t storage );
 int storage_realloc( storage_t storage, size_t size );

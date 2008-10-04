@@ -18,3 +18,4 @@ int64_t intmath_log2( uint64_t n ) {
   if (n >= 0x000000002ll) {           pos +=  1; }
   return ((n == 0) ? (-1) : pos);
 }
+
