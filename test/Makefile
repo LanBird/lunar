@@ -2,7 +2,6 @@
 SRC_DIR = .
 INC_DIR = ../include
 OBJ_DIR = ../build/obj
-TMP_DIR = ../build/tmp
 BIN_DIR = ../build/bin
 
 # use include directory when looking for input .h files
@@ -16,6 +15,7 @@ TEST_O = $(OBJ_DIR)/test.o \
 
 # external objects being tested
 EXT_O  = $(OBJ_DIR)/intmath.o \
+         $(OBJ_DIR)/rtctl.o \
          $(OBJ_DIR)/sha1.o \
          $(OBJ_DIR)/storage.o
 
@@ -39,7 +39,7 @@ $(OBJ_DIR)/test_storage.o:	test_storage.c database.h test.h
 
 # object compilation rule
 $(ALL_O):
-	$(CC) -c $(CFLAGS) $$(basename $@ | sed "s'\.o'.c';") -o $@
+	$(CC) -c $(CFLAGS) -I$(INC_DIR) $$(basename $@ | sed "s'\.o'.c';") -o $@
 
 # executable compilation rule
 $(BIN_DIR)/lunar_tests:	$(OBJ_DIR)/test.o \

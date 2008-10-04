@@ -2,7 +2,6 @@
 SRC_DIR = .
 INC_DIR = ../include
 OBJ_DIR = ../build/obj
-TMP_DIR = ../build/tmp
 BIN_DIR = ../build/bin
 
 # use include directory when looking for input .h files
@@ -15,6 +14,7 @@ CORE_O =   $(OBJ_DIR)/deflate.o \
            $(OBJ_DIR)/intmath.o \
            $(OBJ_DIR)/language_binding.o \
            $(OBJ_DIR)/lua_binding.o \
+           $(OBJ_DIR)/rtctl.o \
            $(OBJ_DIR)/sha1.o \
            $(OBJ_DIR)/storage.o \
            $(OBJ_DIR)/target.o
@@ -56,14 +56,15 @@ $(OBJ_DIR)/language_binding.o:	language_binding.c language_binding.h
 $(OBJ_DIR)/lua_binding.o:	lua_binding.c lua_binding.h
 $(OBJ_DIR)/lunar.o:	lunar.c lunar.h
 $(OBJ_DIR)/lunard.o:	lunard.c lunard.h
+$(OBJ_DIR)/rtctl.o:	rtctl.c rtctl.h
 $(OBJ_DIR)/server.o:	server.c server.h
 $(OBJ_DIR)/sha1.o:	sha1.c sha1.h
-$(OBJ_DIR)/storage.o:	storage.c storage.h
+$(OBJ_DIR)/storage.o:	storage.c storage.h rtctl.h
 $(OBJ_DIR)/target.o:	target.c target.h
 
 # object compilation rule
 $(ALL_O):
-	$(CC) -c $(CFLAGS) $$(basename $@ | sed "s'\.o'.c';") -o $@
+	$(CC) -c $(CFLAGS) -I$(INC_DIR) $$(basename $@ | sed "s'\.o'.c';") -o $@
 
 # executable compilation rules
 # lunar

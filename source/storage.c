@@ -3,7 +3,26 @@
 #include <string.h>
 #include <errno.h>
 
+#include "rtctl.h"
 #include "storage.h"
+
+size_t storage_max_size   = 1024;
+int    storage_auto_chain = 1;
+
+struct rtctl_info storage_max_size_rtctl
+                  = RTCTL_INTEGER_INITIALIZER;
+struct rtctl_info storage_auto_chain_rtctl
+                  = RTCTL_BOOLEAN_INITIALIZER;
+
+/**
+ * Initialize the storage module:
+ *  - create rtctl namespace
+ *  - register rtctl hooks
+ */
+void storage_init( void ) {
+  rtctl_register( &storage_max_size_rtctl, "storage.max_size" );
+  rtctl_register( &storage_auto_chain_rtctl, "storage.auto_chain" );
+}
 
 /**
  * The storage object is used where multiple threads share one resource and
@@ -11,8 +30,9 @@
  * structural changes.
  */
 struct storage_info {
-  size_t size;
-  void * data;
+  storage_t next;            // if the size becomes to big we can chain storages ..
+  void * data;               // load
+  size_t size;               // size of the storage block
   pthread_mutex_t access;    // has to be locked when accessing struct
   pthread_cond_t  available; // locks reached 0
   int locks;                 // -1: exclusive, 0: not locked, >0: shared
@@ -30,8 +50,9 @@ storage_t storage_new( void ) {
   if( storage == NULL ) {
     return NULL;
   }
-  storage->size = 0;
-  storage->data = NULL;
+  storage->next  = NULL;
+  storage->data  = NULL;
+  storage->size  = 0;
   pthread_mutex_init( &storage->access, NULL );
   pthread_cond_init( &storage->available, NULL );
   storage->locks = 0;
@@ -65,8 +86,21 @@ int storage_alloc( storage_t storage, size_t size ) {
  * @param storage the storage to be free'd.
  */
 int storage_free( storage_t storage ) {
-  free( storage->data );
+  storage_t next, delete;
+  
+  storage_write_lock( storage );  
   storage->size = 0;
+  next = storage->next;
+  storage->next = NULL;
+  storage_write_unlock( storage );
+
+  while( next != NULL ) {
+    storage_write_lock( next );  
+    free( next->data );
+    delete = next;
+    next   = next->next;
+    free( delete );
+  }  
   return 0;
 }
 
@@ -77,8 +111,10 @@ int storage_free( storage_t storage ) {
  * @return an errorcode or 0 on success.
  */
 int storage_realloc( storage_t storage, size_t size ) {
-  storage->data = realloc( storage->data, size );
+  storage_write_lock( storage );
+  realloc( storage->data, size );
   storage->size = size;
+  storage_write_unlock( storage );
   return 0;
 }
 
@@ -190,10 +226,8 @@ int storage_write_unlock( storage_t storage ) {
  */
 int storage_read_lock( storage_t storage ) {
   pthread_mutex_lock( &storage->access );
-  while( storage->locks == -1 || storage->waiting > 0 ) {
-    storage->waiting++;
+  while( storage->locks == -1 ) {
     pthread_cond_wait( &storage->available, &storage->access );
-    storage->waiting--;
   }
   storage->locks++;
   pthread_mutex_unlock( &storage->access );
