@@ -13,9 +13,9 @@ struct test_info {
   int warnings;
 };
 
-void test_printf( const char * message, ... );
-void test_warning( const char * message );
-void test_error( const char * message );
+void test_print( const char * message, ... );
+void test_warning( const char * message, ... );
+void test_error( const char * message, ... );
 
 void test_run( struct test_info * test );
 

@@ -9,18 +9,33 @@ struct test_info * current_test;
 const char * current_stage;
 time_t now;
 
-void test_print( const char * message ) {
-  printf( "   * %s\n", message );
+void test_print( const char * message, ... ) {
+  va_list args;
+  va_start( args, message );
+  printf( "     " );
+  vprintf( message, args );
+  printf( "\n" );
+  va_end( args );
 }
 
-void test_error( const char * message ) {
+void test_error( const char * message, ... ) {
+  va_list args;
+  va_start( args, message );
   current_test->errors++;
-  printf( "   * Error: %s\n", message );
+  printf( "   * Error: " );
+  vprintf( message, args );
+  printf( "\n" );
+  va_end( args );
 }
 
-void test_warning( const char * message ) {
+void test_warning( const char * message, ... ) {
+  va_list args;
+  va_start( args, message );
   current_test->warnings++;
-  printf( "   * Warning: %s\n", message );
+  printf( "   ! Warning: " );
+  vprintf( message, args );
+  printf( "\n" );
+  va_end( args );
 }
 
 void test_run( struct test_info * test ) {

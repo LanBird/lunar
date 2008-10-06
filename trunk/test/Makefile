@@ -11,6 +11,7 @@ VPATH = $(INC_DIR)
 TEST_O = $(OBJ_DIR)/test.o \
          $(OBJ_DIR)/test_intmath.o \
          $(OBJ_DIR)/test_sha1.o \
+         $(OBJ_DIR)/test_rtctl.o \
          $(OBJ_DIR)/test_storage.o
 
 # external objects being tested
@@ -36,6 +37,7 @@ $(OBJ_DIR)/test_database.o:	test_database.c database.h test.h storage.h sha1.h i
 $(OBJ_DIR)/test_intmath.o:	test_intmath.c intmath.h test.h
 $(OBJ_DIR)/test_sha1.o:	test_sha1.c sha1.h test.h
 $(OBJ_DIR)/test_storage.o:	test_storage.c database.h test.h
+$(OBJ_DIR)/test_rtctl.o:	test_rtctl.c rtctl.h test.h
 
 # object compilation rule
 $(ALL_O):

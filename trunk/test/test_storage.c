@@ -5,23 +5,24 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "test.h"
+#include "storage.h"
+
 struct storage_info {
-  size_t size;
-  void * data;
+  storage_t next;            // if the size becomes to big we can chain storages ..
+  void * data;               // load
+  size_t size;               // size of the storage block
   pthread_mutex_t access;    // has to be locked when accessing struct
   pthread_cond_t  available; // locks reached 0
   int locks;                 // -1: exclusive, 0: not locked, >0: shared
   int waiting;               // number of threads waiting for free condition
 };
 
-#include "test.h"
-#include "storage.h"
-
 void storage_set_up();
 void storage_test();
 void storage_tear_down();
 
-struct test_info test_storage= {
+struct test_info test_storage = {
   "Storage",
   __FILE__,
   storage_set_up,
@@ -49,11 +50,7 @@ void * storage_writer( void * data ) {
 
 void * storage_reader( void * data ) {
   while( finish == 0 ) {
-    storage_read_lock( shared_storage );
-    if( shared_storage->locks > 1 ) {
-      shares++;
-    }
-    storage_read_unlock( shared_storage );
+    storage_read( shared_storage, 0, buffer, 512 );
   }
   return data;
 }
@@ -72,10 +69,15 @@ void storage_test() {
   int i;
   int data1 = 0;
   int data2 = 0;
-  int turns = 4096;
+  int turns = 2048;
 
   for( i = 0; i < turns; i++ ) {
-    storage_read( shared_storage, 0, buffer, 512 );
+    storage_read_lock( shared_storage );
+    if( shared_storage->locks > 1 ) {
+      shares++;
+    }
+    memcpy( buffer, shared_storage->data, 512 );
+    storage_read_unlock( shared_storage );
     if( strncmp( buffer, valid1, 512 ) == 0 ) {
       data1++;
     } else if( strncmp( buffer, valid2, 512 ) == 0 ) {
@@ -84,6 +86,10 @@ void storage_test() {
       test_error( "Read inconsistent data!" );
     }
   }
+
+  test_print( "data1: %i times | data2: %i times", data1, data2 );
+  test_print( "512 byte blocks written: %i", writes );
+  test_print( "asynchronous shared reads: %i", shares );
 
   if( data1 == 0 ) {
     test_error( "First writer not scheduled." );
