@@ -70,6 +70,9 @@ solaris:
 	  OBJ_DIR="$$(cd .. && cd $(OBJ_DIR) && pwd)" \
 	  BIN_DIR="$$(cd .. && cd $(BIN_DIR) && pwd)"
 
+test:	$(OSTYPE)
+	@cd $(BIN_DIR) && ./lunar_tests
+
 install:	build test
 	@echo "Installing Lunar ..."
 

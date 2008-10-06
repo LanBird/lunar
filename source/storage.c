@@ -226,7 +226,7 @@ int storage_write_unlock( storage_t storage ) {
  */
 int storage_read_lock( storage_t storage ) {
   pthread_mutex_lock( &storage->access );
-  while( storage->locks == -1 ) {
+  while( storage->locks == -1 || storage->waiting > 0 ) {
     pthread_cond_wait( &storage->available, &storage->access );
   }
   storage->locks++;
@@ -262,9 +262,11 @@ int storage_read_unlock( storage_t storage ) {
   pthread_mutex_lock( &storage->access );
   storage->locks--;
   if( storage->locks == 0 ) {
+    pthread_mutex_unlock( &storage->access );
     pthread_cond_signal( &storage->available );
+  } else {
+    pthread_mutex_unlock( &storage->access );
   }
-  pthread_mutex_unlock( &storage->access );
   return 0;
 }
 

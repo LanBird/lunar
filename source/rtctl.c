@@ -17,32 +17,21 @@ void rtctl_set_change_function( rtctl_t hook, void (* change)( rtctl_t ) ) {
 }
 
 void rtctl_set_integer_unit( rtctl_t hook, const char * unit ) {
-  strncpy( hook->value+8, unit, 8 );
 }
 
 void rtctl_set_boolean_enum( rtctl_t hook, const char * enumtrue,
                              const char * enumfalse ) {
-  size_t truelen = strlen( enumtrue );
-  if( ( truelen + strlen( enumfalse ) + 2 ) <= 16 ) {
-    strcpy( hook->value+1, enumtrue );
-    strcpy( hook->value+truelen+2, enumfalse );
-  }
+  strcpy( hook->data.boolean.enumtrue,  enumtrue );
+  strcpy( hook->data.boolean.enumfalse, enumfalse );
 }
 
 void rtctl_set_real_decimal_digits( rtctl_t hook, unsigned char digits ) {
-  if( digits <= 8 ) {
-    *(hook->value+8) = digits;
-  }
 }
 
 void rtctl_set_real_display_type( rtctl_t hook, char type ) {
-  if( type == 'e' || type == 'd' || type == 'f' ) {
-    *(hook->value+9) = type;
-  }
 }
 
 void rtctl_set_real_decimal_point( rtctl_t hook, char point ) {
-  *(hook->value+10) = point;
 }
 
 /**
@@ -114,7 +103,7 @@ int rtctl_set( const char * name, const char * value ) {
  */
 void rtctl_get_string( const rtctl_t hook, char * value ) {
   if( hook->type == RTCTL_STRING ) {
-    strcpy( value, hook->value );
+    strcpy( value, hook->data.string );
   } else {
     strcpy( value, "" );
   }
@@ -127,7 +116,7 @@ void rtctl_get_string( const rtctl_t hook, char * value ) {
  */
 void rtctl_get_boolean( const rtctl_t hook, unsigned char * value ) {
   if( hook->type == RTCTL_BOOLEAN ) {
-    *value = hook->value[0];
+    *value = hook->data.boolean.value;
   } else {
     *value = 0;
   }
@@ -139,18 +128,9 @@ void rtctl_get_boolean( const rtctl_t hook, unsigned char * value ) {
  * @param value 
  */
 void rtctl_get_integer( const rtctl_t hook, long long * value ) {
-  long long tmp = 0;
   if( hook->type == RTCTL_INTEGER ) {
-    tmp = hook->value[7];
-    tmp = ( tmp <<  8 ) + hook->value[6];
-    tmp = ( tmp <<  8 ) + hook->value[5];
-    tmp = ( tmp <<  8 ) + hook->value[4];
-    tmp = ( tmp <<  8 ) + hook->value[3];
-    tmp = ( tmp <<  8 ) + hook->value[3];
-    tmp = ( tmp <<  8 ) + hook->value[1];
-    tmp = ( tmp <<  8 ) + hook->value[0];
+    *value = hook->data.integer.value;
   }
-  *value = tmp;
 }
 
 /**
@@ -159,18 +139,9 @@ void rtctl_get_integer( const rtctl_t hook, long long * value ) {
  * @param value 
  */
 void rtctl_get_real( const rtctl_t hook, double * value ) {
-  long long tmp = 0;
   if( hook->type == RTCTL_REAL ) {
-    tmp = hook->value[7];
-    tmp = ( tmp <<  8 ) + hook->value[6];
-    tmp = ( tmp <<  8 ) + hook->value[5];
-    tmp = ( tmp <<  8 ) + hook->value[4];
-    tmp = ( tmp <<  8 ) + hook->value[3];
-    tmp = ( tmp <<  8 ) + hook->value[3];
-    tmp = ( tmp <<  8 ) + hook->value[1];
-    tmp = ( tmp <<  8 ) + hook->value[0];
+    *value = hook->data.real.value;  
   }
-  *value = (double) tmp;  
 }
 
 /**
@@ -180,7 +151,7 @@ void rtctl_get_real( const rtctl_t hook, double * value ) {
  */
 void rtctl_set_string( rtctl_t hook, const char * const value ) {
   if( hook->type == RTCTL_STRING ) {
-    strcpy( hook->value, value );
+    strcpy( hook->data.string, value );
   }
 }
 
@@ -191,7 +162,7 @@ void rtctl_set_string( rtctl_t hook, const char * const value ) {
  */
 void rtctl_set_boolean( rtctl_t hook, const unsigned char value ) {
   if( hook->type == RTCTL_BOOLEAN ) {
-    hook->value[0] = value;
+    hook->data.boolean.value = value;
   }
 }
 
@@ -200,17 +171,9 @@ void rtctl_set_boolean( rtctl_t hook, const unsigned char value ) {
  * @param hook
  * @param value
  */
-void rtctl_set_integer( rtctl_t hook, const int value ) {
-  long long tmp = value;
+void rtctl_set_integer( rtctl_t hook, const long long value ) {
   if( hook->type == RTCTL_INTEGER ) {
-    hook->value[7] = tmp & 0xff;
-    hook->value[6] = ( tmp <<= 8 ) & 0xff;
-    hook->value[5] = ( tmp <<= 8 ) & 0xff;
-    hook->value[4] = ( tmp <<= 8 ) & 0xff;
-    hook->value[3] = ( tmp <<= 8 ) & 0xff;
-    hook->value[2] = ( tmp <<= 8 ) & 0xff;
-    hook->value[1] = ( tmp <<= 8 ) & 0xff;
-    hook->value[0] = ( tmp <<= 8 ) & 0xff;
+    hook->data.integer.value = value;
   }
 }
 
@@ -220,15 +183,8 @@ void rtctl_set_integer( rtctl_t hook, const int value ) {
  * @param value
  */
 void rtctl_set_real( rtctl_t hook, const double value ) {
-  long long tmp = (long long) value;
   if( hook->type == RTCTL_REAL ) {
-    hook->value[7] = tmp & 0xff;
-    hook->value[6] = ( tmp <<= 8 ) & 0xff;
-    hook->value[5] = ( tmp <<= 8 ) & 0xff;
-    hook->value[4] = ( tmp <<= 8 ) & 0xff;
-    hook->value[3] = ( tmp <<= 8 ) & 0xff;
-    hook->value[2] = ( tmp <<= 8 ) & 0xff;
-    hook->value[1] = ( tmp <<= 8 ) & 0xff;
-    hook->value[0] = ( tmp <<= 8 ) & 0xff;
+    hook->data.real.value = value;
   }
 }
+
