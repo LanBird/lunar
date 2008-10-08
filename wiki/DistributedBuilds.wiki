@@ -1,4 +1,5 @@
 #summary Ideas for distributed builds
+#labels Phase-Requirements
 
 = Introduction =
 
@@ -20,3 +21,7 @@ First versions of build distribution will be able to inform other Lunar instance
 The next step will be optimization of the dependency tree so that only few files need to be sent over network. This requires exchanging information about modification time and checksums.　Up to this point files are not synchronized and the user will need to use NFS or something similar.
 
 At last the file synchronization will be implemented. At this point the most difficult tasks have already been solved and the synchronization is barely compressing a file, sending it to the recipient who will decompress it and use it for building.
+
+= Solution =
+
+Each target specifies input and output files. When triggering a build on a remote host, all input files have to be updated. If the build finishes successfully the remote host is known to have up-to-date versions of the output files.
