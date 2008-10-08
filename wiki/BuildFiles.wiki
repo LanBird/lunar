@@ -1,4 +1,5 @@
 #summary Examples of build.lua files.
+#labels Phase-Deploy
 
 = Table of Contents =
 
