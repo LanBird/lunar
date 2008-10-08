@@ -1,4 +1,5 @@
 #summary A brief introduction on version numbers in lunar releases
+#labels Phase-Requirements
 
 = Table of Contents =
   * Roadmap
