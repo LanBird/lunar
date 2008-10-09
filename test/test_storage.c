@@ -87,10 +87,6 @@ void storage_test_concurrent_access() {
     }
   }
 
-  test_print( "data1: %i times | data2: %i times", data1, data2 );
-  test_print( "512 byte blocks written: %i", writes );
-  test_print( "asynchronous shared reads: %i", shares );
-
   if( data1 == 0 ) {
     test_error( "First writer not scheduled." );
   }
@@ -112,7 +108,7 @@ void storage_test_concurrent_access() {
 }
 
 void storage_test() {
-  test_print( ">>> concurrent access" );
+  test_print( "concurrent access" );
   storage_test_concurrent_access();
 }
 
