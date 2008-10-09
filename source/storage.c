@@ -9,10 +9,8 @@
 size_t storage_max_size   = 1024;
 int    storage_auto_chain = 1;
 
-struct rtctl_info storage_max_size_rtctl
-                  = RTCTL_INTEGER_INITIALIZER;
-struct rtctl_info storage_auto_chain_rtctl
-                  = RTCTL_BOOLEAN_INITIALIZER;
+struct rtctl_info storage_max_size_rtctl = RTCTL_INTEGER_INITIALIZER;
+struct rtctl_info storage_auto_chain_rtctl = RTCTL_BOOLEAN_INITIALIZER;
 
 /**
  * Initialize the storage module:

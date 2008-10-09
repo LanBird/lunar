@@ -14,14 +14,6 @@ typedef struct rtctl_info * rtctl_t;
 
 /**
  * The internal representation of runtime controllable values.
- * The values are encoded using the following scheme:
- *   strings:  plain ascii representation
- *   booleans: 1 byte value (true = 0xff, false = 0x00, everything else invalid ),
- *             16 bytes choices, separated, ended by \0 ("true" then "false")
- *   integers: 8 bytes int, 8+1 bytes unit
- *   reals:    8 bytes double, 1 byte number of decimal digits,
- *             1 byte representation (e = scientific, d = decimal, f = fraction)
- *             1 byte decimal point character (or division sign for fractions)
  */
 struct rtctl_info {
   union {
