@@ -35,6 +35,7 @@ void intmath_log2_test() {
 }
 
 void intmath_test() {
+  test_print( ">>> log2" );
   intmath_log2_test();
 }
 

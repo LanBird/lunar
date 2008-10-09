@@ -65,7 +65,7 @@ void storage_set_up() {
   sleep( 1 );
 }
 
-void storage_test() {
+void storage_test_concurrent_access() {
   int i;
   int data1 = 0;
   int data2 = 0;
@@ -109,6 +109,11 @@ void storage_test() {
   if( shares == 0 ) {
     test_error( "Readers don't seem to share storage." );
   }
+}
+
+void storage_test() {
+  test_print( ">>> concurrent access" );
+  storage_test_concurrent_access();
 }
 
 void storage_tear_down() {
