@@ -94,19 +94,19 @@ void rtctl_test_real_conversion() {
 }
 
 void rtctl_test() {
-  test_print( ">>> initialization" );
+  test_print( "initialization" );
   rtctl_test_initialization();
-  test_print( ">>> lookup" );
+  test_print( "lookup" );
   rtctl_test_lookup();
-  test_print( ">>> string conversion" );
+  test_print( "string conversion" );
   rtctl_test_string_conversion();
-  test_print( ">>> boolean conversion" );
+  test_print( "boolean conversion" );
   rtctl_test_boolean_conversion();
-  test_print( ">>> integer conversion" );
+  test_print( "integer conversion" );
   rtctl_test_integer_conversion();
-  test_print( ">>> real conversion" );
+  test_print( "real conversion" );
   rtctl_test_real_conversion();
-  test_print( ">>> name-based access" );
+  test_print( "name-based access" );
   test_warning( "Test not yet implemented" );
 }
 

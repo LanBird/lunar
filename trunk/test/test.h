@@ -11,6 +11,7 @@ struct test_info {
   void (* tear_down)();
   int errors;
   int warnings;
+  double time;
 };
 
 void test_print( const char * message, ... );
