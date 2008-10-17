@@ -11,7 +11,7 @@ typedef struct table_info * table_t;
 typedef struct index_info * index_t;
 
 table_t database_new_table( uint64_t record_size, uint64_t initial_records );
-index_t database_new_index( table_t table, uint64_t (* function)(void *, uint64_t, int) );
+index_t database_new_index( uint64_t (* function)(void *, size_t) );
 
 int database_table_insert( table_t table, void * buffer );
 int database_table_select( table_t table, uint64_t key, void * buffer );

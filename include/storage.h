@@ -5,6 +5,8 @@
 #ifndef _LUNAR_STORAGE_H
 #define _LUNAR_STORAGE_H
 
+#include <stdlib.h>
+
 typedef struct storage_info * storage_t;
 
 storage_t storage_new();
