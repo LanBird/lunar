@@ -36,7 +36,8 @@ struct pattern_trie_node_info {
 struct pattern_trie_traverse_context {
   uint32_t current_node;
   uint32_t matched_bytes;
-  uint8_t  state;
+  uint32_t last_pattern_match;
+  uint32_t state;
 };
 
 /**
@@ -46,10 +47,10 @@ struct pattern_trie_traverse_context {
  * @param key the string to be looked up
  * @param c the context to store the results in
  */
-void pattern_trie_traverse( struct pattern_trie_node_info * node,
+void pattern_trie_traverse( struct pattern_trie_node_info * nodes,
                             const char * key,
                             struct pattern_trie_traverse_context * c ) {
-  
+  struct pattern_trie_node_info * node = nodes + nodes->data.next.p1;
   register char    in_byte = *key;
   register uint8_t pattern;
   register uint8_t mask;
@@ -57,6 +58,7 @@ void pattern_trie_traverse( struct pattern_trie_node_info * node,
   register uint8_t crit_bits;
   uint32_t matched_bytes = 0;
   
+// TODO: Preserve c->last_pattern_match correctly
   do {
     pattern   = node->pattern;
     mask      = node->mask;
@@ -68,9 +70,9 @@ void pattern_trie_traverse( struct pattern_trie_node_info * node,
       break;
     } else {
       if( ( crit_bits & in_byte ) == 0 ) {
-        node = node->data.next.p0;
+        node = nodes + node->data.next.p0;
       } else if( ( crit_bits & in_byte ) == crit_bits ) {
-        node = node->data.next.p1;
+        node = nodes + node->data.next.p1;
       } else {
         // no match of critical bits, masked part matches
         c->state = 2;
@@ -102,14 +104,88 @@ int pattern_trie_create( storage_t trie ) {
   // first node = { .data.next.p0 = pointer to first free node,
   //                .data.next.p1 = pointer to first used node }
   // free nodes = { .data.next.p0 = pointer to next free node }
-  uint32_t node;
-
-  nodes[ 0 ].data.next.p0 = 1;
-  nodes[ 0 ].data.next.p1 = 0;
-  for( node=1; node<max_nodes; node++ ) {
-    nodes[ node ].data.next.p0 = node+1;
-  }
-  nodes[ node ].data.next.p0 = 0;
 
   return 0;
+}
+
+/**
+ * Lookup a node and write it's value to the specified location.
+ * @param trie the trie to be searched for the key
+ * @param key the key = path to be traversed
+ * @param value a pointer to output variable
+ * @return zero on success, 1 if the node was not found
+ */
+int pattern_trie_lookup( storage_t trie, const char * key, uint64_t * value ) {
+  struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
+  struct pattern_trie_node_info * nodes  = trie->data;
+  pattern_trie_traverse( nodes, key, &c );
+  if( c->status == 0 ) {
+    *value = nodes[ c->current_node ].data.value;
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+/**
+ * Insert a key-value pair into the trie. Traverse the trie as far as possible
+ * then edit the first non-matching node and insert the rest of the key and the
+ * value.
+ * @param trie the trie to be modified
+ * @param key the key to be inserted
+ * @param value the value to be inserted
+ * @return zero on success, 1 if the node already exists, 2 if some other kind
+ * of error occured and the node has not been inserted
+ */
+int pattern_trie_insert( storage_t trie, const char * key, uint64_t value ) {
+  struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
+  struct pattern_trie_node_info * nodes  = trie->data;
+  pattern_trie_traverse( nodes, key, &c );
+  if( c->status == 0 ) {
+    return 1;
+  } else {
+    // modify current node
+    // for each remaining byte in key insert it as a new node requireing a full
+    // match
+  }
+}
+
+/**
+ * Update a key value pair present in the trie. Same as lookup except it changes
+ * the value instead of reading it.
+ * @param trie the trie to be modified
+ * @param key the key to be updated
+ * @param value the new value to be associated with key
+ * @return zero on success, 1 if the node does not exist, 2 if some other kind of
+ * error occured and the node has not been updated
+ */
+int pattern_trie_update( storage_t trie, const char * key, uint64_t value ) {
+  struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
+  struct pattern_trie_node_info * nodes  = trie->data;
+  pattern_trie_traverse( nodes, key, &c );
+  if( c->status == 0 ) {
+    nodes[ c->current_node ].data.value = value;
+  } else {
+    return 1;
+  }
+}
+
+/**
+ * Delete a key and the associated value from the trie. This is quite some work:
+ * compare each node while traversing and remember the last node that pattern-
+ * matched. After the key has found, delete all nodes from the preserved node
+ * until the leaf. Insert all deleted nodes into the list of free nodes.
+ * @param trie the trie to be modified
+ * @param key the key of the key-value pair to be dropped
+ * @return zero on success, 1 if the key was not found
+ */
+int pattern_trie_delete( storage_t trie, const char * key ) {
+  struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
+  struct pattern_trie_node_info * nodes  = trie->data;
+  pattern_trie_traverse( nodes, key, &c );
+  if( c->status == 0 ) {
+    // follow last_pattern_match to the leaf ..
+  } else {
+    return 1;
+  }
 }
