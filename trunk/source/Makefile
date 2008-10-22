@@ -14,11 +14,14 @@ CORE_O =   $(OBJ_DIR)/deflate.o \
            $(OBJ_DIR)/intmath.o \
            $(OBJ_DIR)/language_binding.o \
            $(OBJ_DIR)/lua_binding.o \
-           $(OBJ_DIR)/pattern_trie.o \
            $(OBJ_DIR)/rtctl.o \
            $(OBJ_DIR)/sha1.o \
            $(OBJ_DIR)/storage.o \
            $(OBJ_DIR)/target.o
+
+# objects currently in development
+DEV_O = $(OBJ_DIR)/pattern_trie.o \
+        $(OBJ_DIR)/hash_map.o
 
 CLIENT_O = $(OBJ_DIR)/client.o
 
@@ -52,7 +55,7 @@ $(OBJ_DIR)/database.o:	database.c database.h intmath.h sha1.h storage.h
 $(OBJ_DIR)/deflate.o:	deflate.c deflate.h
 $(OBJ_DIR)/file.o:	file.c file.h
 $(OBJ_DIR)/gz.o:	gz.c gz.h
-$(OBJ_DIR)/hash_map.o:	hash_map.c hash_map.h storage.h rtctl.h
+$(OBJ_DIR)/hash_map.o:	hash_map.c hash_map.h storage.h sha1.h rtctl.h
 $(OBJ_DIR)/intmath.o:	intmath.c intmath.h
 $(OBJ_DIR)/language_binding.o:	language_binding.c language_binding.h
 $(OBJ_DIR)/lua_binding.o:	lua_binding.c lua_binding.h

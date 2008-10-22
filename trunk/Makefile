@@ -5,7 +5,7 @@ OBJ_DIR = build/obj
 BIN_DIR = build/bin
 
 CC = gcc
-CFLAGS = -O2 -Wall
+CFLAGS = -O3 -Wall
 LDFLAGS = -llua -pthread
 MKDIR = mkdir -p
 

@@ -5,16 +5,19 @@
 #include "rtctl.h"
 #include "hash_map.h"
 
-int    hash_map_initial_size = 16;
+double hash_map_growth_factor = 1.3;
+int    hash_map_initial_size  = 16;
 double hash_map_max_fill = 0.75;
-struct rtctl_info hash_map_initial_size_rtctl = RTCTL_INTEGER_INITIALIZER;
-struct rtctl_info hash_map_max_fill_rtctl     = RTCTL_REAL_INITIALIZER;
+struct rtctl_info hash_map_growth_factor_rtctl = RTCTL_REAL_INITIALIZER;
+struct rtctl_info hash_map_initial_size_rtctl  = RTCTL_INTEGER_INITIALIZER;
+struct rtctl_info hash_map_max_fill_rtctl      = RTCTL_REAL_INITIALIZER;
 
 /**
  * Initialize the hash map module:
  *  - register rtctl hooks
  */
 void hash_map_init( void ) {
+  rtctl_register( &hash_map_growth_factor_rtctl, "hash_map.growth_factor" );
   rtctl_register( &hash_map_initial_size_rtctl, "hash_map.initial_size" );
   rtctl_register( &hash_map_max_fill_rtctl, "hash_map.max_fill" );
 }
