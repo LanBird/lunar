@@ -41,7 +41,6 @@ struct rtctl_info {
 
 void rtctl_set_init_function( rtctl_t hook, void (* init)( rtctl_t ) );
 void rtctl_set_change_function( rtctl_t hook, void (* change)( rtctl_t ) );
-
 void rtctl_set_boolean_enum( rtctl_t hook, const char * enumtrue,
                             const char * enumfalse );
 void rtctl_set_integer_unit( rtctl_t hook, const char * unit );

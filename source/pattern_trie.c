@@ -4,7 +4,9 @@
 #include "rtctl.h"
 #include "pattern_trie.h"
 
+double pattern_trie_growth_factor = 1.3;
 int    pattern_trie_initial_nodes = 16;
+struct rtctl_info pattern_trie_growth_factor_rtctl = RTCTL_INTEGER_INITIALIZER;
 struct rtctl_info pattern_trie_initial_nodes_rtctl = RTCTL_INTEGER_INITIALIZER;
 
 /**
@@ -12,6 +14,7 @@ struct rtctl_info pattern_trie_initial_nodes_rtctl = RTCTL_INTEGER_INITIALIZER;
  *  - register rtctl hooks
  */
 void pattern_trie_init( void ) {
+  rtctl_register( &pattern_trie_growth_factor_rtctl, "pattern_trie.growth_factor" );
   rtctl_register( &pattern_trie_initial_nodes_rtctl, "pattern_trie.initial_nodes" );
 }
 
@@ -36,7 +39,7 @@ struct pattern_trie_node_info {
 struct pattern_trie_traverse_context {
   uint32_t current_node;
   uint32_t matched_bytes;
-  uint32_t last_pattern_match;
+  uint32_t last_fork;
   uint32_t state;
 };
 
@@ -57,8 +60,9 @@ void pattern_trie_traverse( struct pattern_trie_node_info * nodes,
   register uint8_t criterion;
   register uint8_t crit_bits;
   uint32_t matched_bytes = 0;
+  uint32_t last_fork     = 0;
   
-// TODO: Preserve c->last_pattern_match correctly
+// TODO: optimize last_fork preservation
   do {
     pattern   = node->pattern;
     mask      = node->mask;
@@ -69,6 +73,9 @@ void pattern_trie_traverse( struct pattern_trie_node_info * nodes,
       c->state = 0;
       break;
     } else {
+      if( mask != 0xff ) {
+        last_fork = node - nodes;
+      }
       if( ( crit_bits & in_byte ) == 0 ) {
         node = nodes + node->data.next.p0;
       } else if( ( crit_bits & in_byte ) == crit_bits ) {
@@ -91,6 +98,7 @@ void pattern_trie_traverse( struct pattern_trie_node_info * nodes,
   } while( 1 );
   c->current_node  = node - nodes;
   c->matched_bytes = matched_bytes;
+  c->last_fork     = last_fork;
 }
 
 /**
