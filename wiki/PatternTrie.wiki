@@ -1,0 +1,6 @@
+#summary A documentation of the pattern_trie data-structure.
+#labels Papers,Phase-Implementation
+
+= Introduction =
+
+= Details =
