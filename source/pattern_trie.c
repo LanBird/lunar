@@ -127,8 +127,8 @@ int pattern_trie_lookup( storage_t trie, const char * key, uint64_t * value ) {
   struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
   struct pattern_trie_node_info * nodes  = trie->data;
   pattern_trie_traverse( nodes, key, &c );
-  if( c->status == 0 ) {
-    *value = nodes[ c->current_node ].data.value;
+  if( c.state == 0 ) {
+    *value = nodes[ c.current_node ].data.value;
     return 0;
   } else {
     return 1;
@@ -149,7 +149,7 @@ int pattern_trie_insert( storage_t trie, const char * key, uint64_t value ) {
   struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
   struct pattern_trie_node_info * nodes  = trie->data;
   pattern_trie_traverse( nodes, key, &c );
-  if( c->status == 0 ) {
+  if( c.state == 0 ) {
     return 1;
   } else {
     // modify current node
@@ -171,8 +171,8 @@ int pattern_trie_update( storage_t trie, const char * key, uint64_t value ) {
   struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
   struct pattern_trie_node_info * nodes  = trie->data;
   pattern_trie_traverse( nodes, key, &c );
-  if( c->status == 0 ) {
-    nodes[ c->current_node ].data.value = value;
+  if( c.state == 0 ) {
+    nodes[ c.current_node ].data.value = value;
   } else {
     return 1;
   }
@@ -191,7 +191,7 @@ int pattern_trie_delete( storage_t trie, const char * key ) {
   struct pattern_trie_traverse_context c = { 0, 0, 0, 0 };
   struct pattern_trie_node_info * nodes  = trie->data;
   pattern_trie_traverse( nodes, key, &c );
-  if( c->status == 0 ) {
+  if( c.state == 0 ) {
     // follow last_pattern_match to the leaf ..
   } else {
     return 1;
