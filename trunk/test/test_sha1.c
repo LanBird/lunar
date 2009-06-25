@@ -20,13 +20,13 @@ void sha1_test() {
   uint32_t h[5];
   
   test_print( "multiblock message digest" );
-  sha1( (uint8_t *) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 448/8, h );
+  sha1_bytes( h, (uint8_t *) "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 448/8 );
   if( x[0] != h[0] || x[1] != h[1] || x[2] != h[2] || x[3] != h[3] || x[4] != h[4] ) {
     test_error( "Sha1 computed invalid checksum for \"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq\"!" );
   }
 
   test_print( "empty message digest" );
-  sha1( (uint8_t *) "", 0, h );
+  sha1_bytes( h, (uint8_t *) "", 0 );
   if( y[0] != h[0] || y[1] != h[1] || y[2] != h[2] || y[3] != h[3] || y[4] != h[4] ) {
     test_error( "Sha1 computed invalid checksum for \"\"!" );
   }

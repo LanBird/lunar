@@ -62,7 +62,7 @@ table_t database_tables = NULL;
  */
 uint64_t database_hash( void * buffer, uint64_t size, int pass ) {
   uint32_t hash[5];
-  sha1( buffer, size, hash );
+  sha1_bytes( hash, buffer, size );
   return ( (uint64_t) hash[pass%5] ) << 32 | hash[(pass*3)%5];
 }
 
